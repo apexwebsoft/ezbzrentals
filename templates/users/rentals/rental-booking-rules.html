@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Booking Rules | EZBZ Rentals</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="" name="description" />
+<meta content="" name="author" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<link rel="shortcut icon" href="/static/users/images/favicon.png">
+<link href="/static/users/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/icons.min.css" rel="stylesheet" type="text/css" />
+<link href="/static/users/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/custom.css" rel="stylesheet" type="text/css" />
+</head>
+<body data-layout="horizontal">
+<div id="layout-wrapper">
+{% include 'users/base/header.html'%}
+<div class="main-content">
+<div class="page-content">
+<div class="container">
+  <div class="row">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-10">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-3 mrgbp brdr">
+              {% include 'users/rentals/rental_nav.html'%}
+            </div>
+            <div class="col-lg-9">
+              <h5>Booking Rules</h5>
+              <p>Lorem Ipsum è un testo segnaposto utilizzato nel settore della tipografia e della stampa. Lorem Ipsum è considerato il testo segnaposto standard</p>
+              <hr>
+              {% if messages %}
+              {% for message in messages %}
+              <div class="alert alert-success alert-dismissible fade show" role="alert">{{message}}   
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"
+                  aria-label="Close"></button>
+              </div>
+              {% endfor %}
+              {%endif%}
+              <form method="POST" enctype="multipart/form-data" class="post-form" action="/rentals/booking-rules-update/{{bookingrules.id}}">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-lg-9">
+                    <label class="form-label fw6" >How many days before check-in do you allow bookings?</label>
+                    <select name="before_checkin_allow"  class="form-select" required>
+                      <option disabled>--Select--</option>
+                      <option value="No advance notice required" {% if bookingrules.before_checkin_allow == "No advance notice required" %} selected {% endif %}>No advance notice required</option>
+                      <option value="Atleast 1 day notice" {% if bookingrules.before_checkin_allow == "Atleast 1 day notice" %} selected {% endif %}>Atleast 1 day notice</option>
+                      <option value="Atleast 2 day's notice" {% if bookingrules.before_checkin_allow == "Atleast 2 day's notice" %} selected {% endif %}>Atleast 2 day's notice</option>
+                      <option value="Atleast 3 day's notice" {% if bookingrules.before_checkin_allow == "Atleast 3 day's notice" %} selected {% endif %}>Atleast 3 day's notice</option>
+                      <option value="Atleast 5 day's notice" {% if bookingrules.before_checkin_allow == "Atleast 5 day's notice" %} selected {% endif %}>Atleast 5 day's notice</option>
+                      <option value="Atleast 7 day's notice" {% if bookingrules.before_checkin_allow == "Atleast 7 day's notice" %} selected {% endif %}>Atleast 7 day's notice</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-9">
+                    <label class="form-label fw6" >Preferred policy</label>
+                    <p>Your previously defined rates will be used when guests book using this cancellation policy.</p>
+                    <select name="prefered_policy"  class="form-select" required>
+                      <option disabled>--Select--</option>
+                      <option value="Free cancellation upto 7 days:100% refund upto 7 days prior to check-in" {% if bookingrules.prefered_policy == "Free cancellation upto 7 days:100% refund upto 7 days prior to check-in" %} selected {% endif %}>Free cancellation upto 7 days:100% refund upto 7 days prior to check-in</option>
+                      <option value="Free cancellation upto 14 days:100% refund upto 14 days prior to check-in" {% if bookingrules.prefered_policy == "Free cancellation upto 14 days:100% refund upto 14 days prior to check-in" %} selected {% endif %}>Free cancellation upto 14 days:100% refund upto 14 days prior to check-in</option>
+                      <option value="Free cancellation upto 21 days:100% refund upto 21 days prior to check-in" {% if bookingrules.prefered_policy == "Free cancellation upto 21 days:100% refund upto 21 days prior to check-in" %} selected {% endif %}>Free cancellation upto 21 days:100% refund upto 21 days prior to check-in</option>
+                      <option value="Super flexible:50% refund upto check-in,except fees" {% if bookingrules.prefered_policy == "Super flexible:50% refund upto check-in,except fees" %} selected {% endif %}>Super flexible:50% refund upto check-in,except fees</option>
+                      <option value="Flexible:50% refund upto 21 days prior to check-in,except fees" {% if bookingrules.prefered_policy == "Flexible:50% refund upto 21 days prior to check-in,except fees" %} selected {% endif %}>Flexible:50% refund upto 21 days prior to check-in,except fees</option>
+                      <option value="Moderate:50% refund upto 7 days prior to check-in,except fees" {% if bookingrules.prefered_policy == "Moderate:50% refund upto 7 days prior to check-in,except fees" %} selected {% endif %}>Moderate:50% refund upto 7 days prior to check-in,except fees</option>
+                      <option value="Fixed:50% refund upto 14 days prior to check-in,except fees" {% if bookingrules.prefered_policy == "Fixed:50% refund upto 14 days prior to check-in,except fees" %} selected {% endif %}>Fixed:50% refund upto 14 days prior to check-in,except fees</option>
+                      <option value="Non refundable:No refund for guest cancellation" {% if bookingrules.prefered_policy == "Non refundable:No refund for guest cancellation" %} selected {% endif %}>Non refundable:No refund for guest cancellation</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-9">
+                    <label class="form-label fw6" >Additional policy</label>
+                    <p>Adjust your rates for guests that book using this cancellation policy.</p>
+                    <select name="additional_policy_increase" class="form-select" required>
+                      <option value="disabled" disabled>--Select--</option>
+                      <option value="Free cancellation upto 7 days:100% refund upto 7 days prior to check-in" {% if bookingrules.additional_policy_increase == "Free cancellation upto 7 days:100% refund upto 7 days prior to check-in" %} selected {% endif %}>Free cancellation upto 7 days:100% refund upto 7 days prior to check-in</option>
+                      <option value="Free cancellation upto 14 days:100% refund upto 14 days prior to check-in" {% if bookingrules.additional_policy_increase == "Free cancellation upto 14 days:100% refund upto 14 days prior to check-in" %} selected {% endif %}>Free cancellation upto 14 days:100% refund upto 14 days prior to check-in</option>
+                      <option value="Free cancellation upto 21 days:100% refund upto 21 days prior to check-in" {% if bookingrules.additional_policy_increase == "Free cancellation upto 21 days:100% refund upto 21 days prior to check-in" %} selected {% endif %}>Free cancellation upto 21 days:100% refund upto 21 days prior to check-in</option>
+                      <option value="Non refundable:No refund for guest cancellation" {% if bookingrules.additional_policy_increase == "Non refundable:No refund for guest cancellation" %} selected {% endif %}>Non refundable:No refund for guest cancellation</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-6">
+                        <label class="form-label fw6" >Rates increase</label>
+                        <input type="text" name="rates_increase" class="form-control" value="{{bookingrules.rates_increase}}"/>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-9">
+                    <label class="form-label fw6" >Additional policy</label>
+                    <p>Adjust your rates for guests that book using this cancellation policy.</p>
+                    <select name="additional_policy_decrease" class="form-select" required>
+                        <option disabled>--Select--</option>
+                        <option value="Non-refundable:No refund for guest cancellation" {% if bookingrules.additional_policy_decrease == "Non-refundable:No refund for guest cancellation" %} selected {% endif %}>Non-refundable:No refund for guest cancellation</option>
+                      </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-6">
+                        <label class="form-label fw6" >Rates decrease</label>
+                        <input type="text" name="rates_decrease" class="form-control" value="{{bookingrules.rates_decrease}}"/>
+                  </div>
+                </div>
+                
+                
+                <div class="mb-3">
+                 <input type="submit" class="btn btn-primary" value="Save">
+                </div>
+              </form>
+            </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>    
+ </div>
+</div>
+{% include 'users/base/footer.html'%} 
+</div>
+</div>
+<script src="/static/users/libs/jquery/jquery.min.js"></script>
+<script src="/static/users/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
+<script src="/static/users/libs/simplebar/simplebar.min.js"></script>
+<script src="/static/users/libs/node-waves/waves.min.js"></script>
+<script src="/static/users/libs/select2/js/select2.min.js"></script>
+<script src="/static/users/js/pages/ecommerce-add-product.init.js"></script>
+<script src="/static/users/js/app.js"></script>
+<script>
+  $(".alert-success").fadeTo(3000, 500).slideUp(500, function(){
+      $(".alert-success").slideUp(500);
+  });
+</script>
+
+  
+</body>
+</html>
