@@ -1,0 +1,58 @@
+-- MySQL dump 10.13  Distrib 8.0.30, for Win64 (x86_64)
+--
+-- Host: localhost    Database: ezbz
+-- ------------------------------------------------------
+-- Server version	8.0.32-0ubuntu0.22.04.2
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `rooms`
+--
+
+DROP TABLE IF EXISTS `rooms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rooms` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `status` tinyint(1) NOT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `updated_at` datetime(6) NOT NULL,
+  `icon` varchar(100) DEFAULT NULL,
+  `room_type_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `rental_room_room_type_id_b879f820_fk_room_type_id` (`room_type_id`),
+  CONSTRAINT `rental_room_room_type_id_b879f820_fk_room_type_id` FOREIGN KEY (`room_type_id`) REFERENCES `room_type` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rooms`
+--
+
+LOCK TABLES `rooms` WRITE;
+/*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
+INSERT INTO `rooms` VALUES (1,'Balcony',1,'2023-01-05 18:05:51.861183','2023-01-05 19:18:14.903559','',1),(2,'Bathroom ',1,'2023-01-05 18:06:49.702346','2023-01-05 19:18:20.011505','',1),(3,'Bedroom ',1,'2023-01-05 18:07:31.288890','2023-01-05 19:18:24.541751','',1),(4,'Dining room',1,'2023-01-05 18:07:39.123438','2023-01-05 19:18:30.557837','',1),(5,'Kitchen ',1,'2023-01-05 18:07:48.055421','2023-01-05 19:18:35.477667','',1),(6,'Living room ',1,'2023-01-05 18:07:56.368568','2023-01-05 19:18:41.223039','',1),(7,'Playroom ',1,'2023-01-05 18:08:09.120092','2023-01-05 19:18:48.030051','',1),(8,'Terrace ',1,'2023-01-05 18:08:16.027806','2023-01-05 19:18:53.730475','',1),(9,'Toilet',1,'2023-01-05 18:08:22.892505','2023-01-05 19:18:58.368888','',1),(10,'Workroom',1,'2023-01-05 18:08:30.937091','2023-01-05 19:19:02.811632','',1),(11,'Balcony ',1,'2023-01-05 18:08:48.488852','2023-01-05 19:19:11.889724','',2),(12,'Bathroom ',1,'2023-01-05 18:08:57.277803','2023-01-05 19:19:19.070701','',2),(13,'Bedroom',1,'2023-01-05 18:09:05.265106','2023-01-05 19:19:26.736786','',2),(14,'Dining room ',1,'2023-01-05 18:09:13.410594','2023-01-05 19:19:33.063512','',2),(15,'Kitchen',1,'2023-01-05 18:09:25.408437','2023-01-05 19:19:39.416480','',2),(16,'Living room',1,'2023-01-05 18:09:33.052253','2023-01-05 19:19:46.464241','',2),(17,'Playroom',1,'2023-01-05 18:09:41.507315','2023-01-05 19:19:52.946173','',2),(18,'Terrace',1,'2023-01-05 18:10:09.553621','2023-01-05 19:19:59.633346','',2),(19,'Toilet',1,'2023-01-05 18:10:18.612522','2023-01-05 19:20:08.182279','',2),(20,'Workroom ',1,'2023-01-05 18:10:28.811153','2023-01-05 19:20:14.649577','',2);
+/*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2023-05-06  0:53:40
