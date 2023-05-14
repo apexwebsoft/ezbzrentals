@@ -28,7 +28,7 @@ from django.contrib.auth import authenticate, login, logout
 from users.tokens import generate_token
 import ast
 
-
+from .booking_pal_api import FeeAndTax, ProductImages, PropertyManager, ProductManager, RatesAndAvailability
 
 # Create your views here.
 
@@ -127,6 +127,99 @@ def signup(request):
             UserProfiles.gender =   'NA'
             UserProfiles.user_id =  LastRow.id           
             UserProfiles.save()
+
+            # Create property manager in BookingPal
+            payload = {
+                "data": {
+                    "isCompany": True,
+                    "companyDetails": {
+                        "accountId": "132",
+                        "companyName": "Test PM company name",
+                        "language": "en",
+                        "fullName": myuser.get_full_name(),
+                        "companyAddress": {
+                            "country": UserProfiles.country,
+                            "state": UserProfiles.state,
+                            "streetAddress": UserProfiles.address,
+                            "city": UserProfiles.city,
+                            "zip": UserProfiles.postal_code
+                        },
+                        "website": UserProfiles.website,
+                        "email": myuser.email,
+                        "phone": {
+                            "countryCode": "321",
+                            "number": UserProfiles.phone
+                        },
+                        "password": request.POST.get('password'),
+                        "currency": "USD"
+                    },
+                    "policies": {
+                        "paymentPolicy": {
+                            "type": "SPLIT",
+                            "splitPayment": {
+                            "depositType": "FLAT",
+                            "value": 4,
+                            "secondPaymentDays": 30
+                            }
+                        },
+                        "cancellationPolicy": {
+                            "type": "MANUAL",
+                            "manualPolicy": {
+                                "type": "FLAT",
+                                "manualPolicies": [
+                                    {
+                                    "chargeValue": 20,
+                                    "beforeDays": 34,
+                                    "cancellationFee": 1
+                                    },
+                                    {
+                                    "chargeValue": 12,
+                                    "beforeDays": 45,
+                                    "cancellationFee": 2
+                                    }
+                                ]
+                            }
+                        },
+                        "feeTaxMandatory": {
+                            "isFeeMandatory": True,
+                            "isTaxMandatory": True
+                        },
+                        "terms": UserProfiles.website,
+                        "checkInTime": "11:00:00",
+                        "checkOutTime": "09:00:00",
+                        "leadTime": 2
+                    },
+                    "payment": {
+                        "paymentType": "MAIL_CHECK",
+                        "creditCard": {
+                            "creditCardType": "POST",
+                            "paymentGateways": {
+                                "paymentGatewaysType": "AUTHORIZE_NET",
+                                "user": "test",
+                                "secret": "test",
+                                "additionalField1": "",
+                                "additionalField2": ""
+                            },
+                            "creditCardList": [
+                                "AMERICAN_EXPRESS",
+                                "DINERS_CLUB"
+                            ]
+                        }
+                    },
+                    "ownerInfo": {
+                        "language": "EN",
+                        "value": "ownerInfo on EN"
+                    },
+                    "neighborhoodOverview": {
+                        "language": "EN",
+                        "value": "neighborhoodOverview on EN"
+                    }
+                }
+            }
+            response, data = PropertyManager().create(payload)
+            if response:
+                UserProfiles.bookingpal_id = data.get('data')[0].get('id')
+                UserProfiles.save()
         # # Welcome Email
         # subject = "Welcome to GFG- Django Login!!"
         # message = "Hello " + myuser.first_name + "!! \n" + "Welcome to GFG!! \nThank you for visiting our website\n. We have also sent you a confirmation email, please confirm your email address. \n\nThanking You\nAnubhav Madhav"        
@@ -292,7 +385,7 @@ def rental_type_destroy(request, id):
 
 @login_required(login_url='/')
 def rental_insert(request):
-    if request.method == "POST": 
+    if request.method == "POST":
         rental=Rental()
         rental.rental_name=request.POST.get('rental_name')
         rental.rental_short_description=request.POST.get('rental_short_description')
@@ -348,9 +441,9 @@ def rental_insert(request):
         bookingrules.rates_increase=""
         bookingrules.additional_policy_decrease=""
         bookingrules.rates_decrease=""
-        houserules.user_id=request.user.id
-        houserules.rental_id=LastRow.id
-        houserules.save()
+        bookingrules.user_id=request.user.id
+        bookingrules.rental_id=LastRow.id
+        bookingrules.save()
 
 
 
@@ -439,6 +532,138 @@ def rental_insert(request):
         rentaldeposit.rental_id=LastRow.id
         rentaldeposit.save()
 
+        # Create property manager in BookingPal
+        payload = {
+            "data": {
+                "name": rental.rental_name,
+                "rooms": 186,
+                "bathrooms": 6,
+                "persons": 198,
+                "propertyType": "PCT101",
+                "supportedLosRates": False,
+                "currency": "USD",
+                "location": {
+                    "postalCode": "60606",
+                    "country": "US",
+                    "region": "Illinois",
+                    "city": "Chicago",
+                    "street": "210 North Wells Street",
+                    "zipCode9": "60606-1330"
+                },
+                # "spaceUnit": "SQ_M",
+                # "policy": {
+                #     "internetPolicy": {
+                #         "accessInternet": True,
+                #         "kindOfInternet": "WiFi",
+                #         "availableInternet": "AllAreas",
+                #         "chargeInternet": "Free"
+                #     },
+                #     "parkingPolicy": {
+                #         "accessParking": True,
+                #         "locatedParking": "OnSite",
+                #         "privateParking": True,
+                #         "chargeParking": "$ 150",
+                #         "timeCostParking": "PerStay",
+                #         "necessaryReservationParking": "NotPossible"
+                #     },
+                #     "petPolicy": {
+                #         "allowedPets": "Allowed",
+                #         "chargePets": "Free"
+                #     },
+                #     "childrenAllowed": True,
+                #     "smokingAllowed": False
+                # },
+                
+                # "multiUnit": "MLT",
+                # "keyCollection": {
+                #     "type": "primary",
+                #     "checkInMethod": "doorman",
+                #     "additionalInfo": {
+                #         "instruction": {
+                #         "how": "how example",
+                #         "when": "when example"
+                #         }
+                #     }
+                # },
+                # "neighborhoodOverview": {},
+                # "about": {}
+            }
+        }
+        response, data = ProductManager().create(payload)
+        if response:
+            rental.bookingpal_id = data.get('data')[0].get('id')
+            rental.save()
+            payload = {
+                "data": {
+                    "productId": 1237790325, #rental.bookingpal_id,
+                    "leadTime": 1,
+                    "rates": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "amount": 1
+                    }
+                    ],
+                    "minStays": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "minStay": 1
+                    }
+                    ],
+                    "maxStays": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "maxStay": 1
+                    }
+                    ],
+                    "restrictions": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "checkIn": {
+                            "monday": True,
+                            "tuesday": True,
+                            "wednesday": True,
+                            "thursday": True,
+                            "friday": True,
+                            "saturday": True,
+                            "sunday": True
+                        },
+                        "checkOut": {
+                            "monday": True,
+                            "tuesday": True,
+                            "wednesday": True,
+                            "thursday": True,
+                            "friday": True,
+                            "saturday": True,
+                            "sunday": True
+                        }
+                    }
+                    ],
+                    "availabilities": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "availability": True
+                    }
+                    ],
+                    "availableCount": [
+                    {
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "count": 1,
+                        "bookedRooms": 1,
+                        "totalRooms": 1
+                    }
+                    ]
+                }
+            }
+            response, data = RatesAndAvailability().create(payload)
+            if response:
+                basicrates.bookingpal_id = data.get('data')[0].get('id')
+                basicrates.save()
         path1 ="/rentals/overview/"
         path2=str(LastInsertId)
         path = path1+path2
@@ -522,9 +747,7 @@ def rental_edit(request, id):
 @login_required(login_url='/')
 def rental_update(request, id): 
     
-    if request.method == "POST": 
-        rental= Rental.objects.get(id=id)
-        rental.rental_name=request.POST.get('rental_name')
+    if request.method == "POST":
         rental= Rental.objects.get(id=id)
         rental.rental_name=request.POST.get('rental_name')
         if 'cover_image' in request.FILES:
@@ -532,7 +755,81 @@ def rental_update(request, id):
         rental.rental_short_description=request.POST.get('rental_short_description')
         rental.rental_description=request.POST.get('rental_description')
         rental.save()
-
+        payload = { "data": { "id": rental.bookingpal_id, "name": rental.rental_name, "rooms": 6, "bathrooms": 6, "persons": 3, "propertyType": "PCT102", "currency": "USD", "supportedLosRates": False, "location": { "postalCode": "60606", "country": "US", "region": "Illinois", "city": "Chicago", "street": "210 North Wells Street", "zipCode9": "60606-1330" }, } }
+        response, data = ProductManager().update(payload)
+        if rental.status:
+            response, data = ProductManager().activate([int(rental.bookingpal_id)])
+        else:
+            response, data = ProductManager().deactivate([int(rental.bookingpal_id)])
+        basicrate_id = BasicRates.objects.get(rental_id=rental.id).bookingpal_id
+        payload = {
+            "data": {
+                "productId": basicrate_id,
+                "leadTime": 1,
+                "rates": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "amount": 2
+                }
+                ],
+                "minStays": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "minStay": 2
+                }
+                ],
+                "maxStays": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "maxStay": 2
+                }
+                ],
+                "restrictions": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "checkIn": {
+                        "monday": True,
+                        "tuesday": True,
+                        "wednesday": True,
+                        "thursday": True,
+                        "friday": True,
+                        "saturday": True,
+                        "sunday": True
+                    },
+                    "checkOut": {
+                        "monday": True,
+                        "tuesday": True,
+                        "wednesday": True,
+                        "thursday": True,
+                        "friday": True,
+                        "saturday": True,
+                        "sunday": True
+                    }
+                }
+                ],
+                "availabilities": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "availability": True
+                }
+                ],
+                "availableCount": [
+                {
+                    "beginDate": "2023-05-01",
+                    "endDate": "2023-05-31",
+                    "count": 2,
+                    "bookedRooms": 2,
+                    "totalRooms": 2
+                }
+                ]
+            }
+        }
+        response, data = RatesAndAvailability().create(payload)
         path1 ="/rentals/basic/"
         path2=str(id)
         path = path1+path2
@@ -544,7 +841,8 @@ def rental_update(request, id):
 
 @login_required(login_url='/')
 def rental_destroy(request, id):  
-    rental= Rental.objects.get(id=id) 
+    rental= Rental.objects.get(id=id)
+    response, data = ProductManager().delete(rental.bookingpal_id)
     rental.delete()  
     return redirect("/users/rentals")  
 
@@ -1037,6 +1335,21 @@ def rental_tax_insert(request,id):
         rentaltax.user_id=request.user.id
         rentaltax.rental_id=id
         rentaltax.save()
+
+        response, data = FeeAndTax().fetch_all(rental.bookingpal_id)
+
+        payload = {"data": data.get("data")[0]}
+        payload["data"]["productId"] = rental.bookingpal_id
+        taxes = payload.get("data").get("taxes", [])
+        taxes.append(
+                    {
+                        "name": "test tax",
+                        "type": "SalesTaxIncluded",
+                        "value": int(request.POST.get('amountin'))
+                    }
+                )
+        payload["data"]["taxes"] = taxes
+        response, data = FeeAndTax().create(payload)
         messages.success(request, 'Data Updated Successfully.')
         return redirect(request.META.get('HTTP_REFERER'))  
     #return render(request,'/users/rentals/rental-additional-info.html',{'rental':rental}) 
@@ -1044,12 +1357,27 @@ def rental_tax_insert(request,id):
 @login_required(login_url='/')
 def rental_tax_update(request,id):
     rentaltax=RentalTax.objects.get(id=id)
+    rental=Rental.objects.get(id=id)
     if request.method == "POST": 
         rentaltax.tax_type=request.POST.get('tax_type')
         rentaltax.fee_basis=request.POST.get('fee_basis') 
         rentaltax.percentage=request.POST.get('percentage')
         rentaltax.amountin=request.POST.get('amountin')
         rentaltax.save()
+        response, data = FeeAndTax().fetch_all(rental.bookingpal_id)
+
+        payload = {"data": data.get("data")[0]}
+        payload["data"]["productId"] = rental.bookingpal_id
+        taxes = payload.get("data").get("taxes", [])
+        taxes.append(
+                    {
+                        "name": "test tax",
+                        "type": "SalesTaxIncluded",
+                        "value": int(request.POST.get('amountin'))
+                    }
+                )
+        payload["data"]["taxes"] = taxes
+        response, data = FeeAndTax().create(payload)
         messages.success(request, 'Data Updated Successfully.')
         return redirect(request.META.get('HTTP_REFERER'))
 
@@ -1078,6 +1406,24 @@ def rental_extra_services_insert(request,id):
         extraservices.user_id=request.user.id
         extraservices.rental_id=id
         extraservices.save()
+        response, data = FeeAndTax.fetch_all(rental.bookingpal_id)
+        payload = {"data": data.get("data")[0]}
+        payload["data"]["productId"] = rental.bookingpal_id
+        fees = payload.get("data").get("fees", [])
+        fees.append({
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "entityType": "OPTIONAL",
+                        "feeType": "GENERAL",
+                        "option": 1,
+                        "name": extraservices.service_name,
+                        "taxType": "TAXABLE",
+                        "unit": "PER_STAY",
+                        "value": int(extraservices.service_price),
+                        "valueType": "FLAT"
+                    })
+        payload["data"]["fees"] = fees
+        response, data = FeeAndTax.create(payload)
         messages.success(request, 'Data Updated Successfully.')
         return redirect(request.META.get('HTTP_REFERER'))  
     #return render(request,'/users/rentals/rental-additional-info.html',{'rental':rental})    
@@ -1096,6 +1442,24 @@ def rental_extra_services_update(request,id):
         extraservices.guest_cancel_order=request.POST.get('guest_cancel_order')
         extraservices.extra_message=request.POST.get('extra_message')
         extraservices.save()
+        response, data = FeeAndTax.fetch_all(rental.bookingpal_id)
+        payload = {"data": data.get("data")[0]}
+        payload["data"]["productId"] = rental.bookingpal_id
+        fees = payload.get("data").get("fees", [])
+        fees.append({
+                        "beginDate": "2023-05-01",
+                        "endDate": "2023-05-31",
+                        "entityType": "OPTIONAL",
+                        "feeType": "GENERAL",
+                        "option": 1,
+                        "name": extraservices.service_name,
+                        "taxType": "TAXABLE",
+                        "unit": "PER_STAY",
+                        "value": int(extraservices.service_price),
+                        "valueType": "FLAT"
+                    })
+        payload["data"]["fees"] = fees
+        response, data = FeeAndTax.create(payload)
         messages.success(request, 'Data Updated Successfully.')
         return redirect(request.META.get('HTTP_REFERER'))  
 
@@ -2340,6 +2704,23 @@ def rentals_gallery_insert(request, id):
 
         data = {'is_valid': True, 'name': rental.image.name, 'url': rental.image.url}
 
+        rental_bookingpal_id = Rental.objects.get(id).bookingpal_id
+
+        payload = {
+            "data": {
+                "productId": rental_bookingpal_id,
+                "image": {
+                    "url": rental.image.url,
+                    "tags": [
+                        ]
+                }
+            }
+        }
+        response, data = ProductImages().create(payload)
+        if response:
+            rentals_gallery.bookingpal_id = data.get('data')[0].get('id')
+            rentals_gallery.save()
+
         
 
     else:
@@ -2351,6 +2732,17 @@ def rentals_gallery_insert(request, id):
 @login_required(login_url='/')
 def gallery_destroy(request, id):  
     gallery = RentalsGallery.objects.get(id=id)  
+    payload = {
+        "data": {
+            "productId": gallery.bookingpal_id,
+            "images": [
+                {
+                    "url": gallery.image.url
+                }
+            ]
+        }
+    }
+    response, data = ProductImages.delete(payload)
     gallery.delete() 
     messages.success(request, ' Row deleted Successfully.')
 
@@ -2419,7 +2811,7 @@ def profile(request):
     
     users = UserProfile.objects.get(user_id=request.user.id)
     selected_languages= users.language_spoken
-    lang = ast.literal_eval(selected_languages)
+    # lang = ast.literal_eval(selected_languages)
     
     country=Country.objects.all()
     propertyrole=PropertyRole.objects.all()
@@ -2429,7 +2821,7 @@ def profile(request):
         'propertyrole':propertyrole,
         'dates': dates,
         'selected_languages':selected_languages,
-        'lang':lang
+        # 'lang':lang
     }
     return render(request,"users/user/profile.html",context)
 
@@ -2463,6 +2855,35 @@ def profile_update(request,id):
         users.language_spoken =  request.POST.getlist('language_spoken') 
         users.gender =   request.POST.get('gender')
         users.save()
+
+        # Update property manager in BookingPal
+        payload = {
+            "data": {
+                "id": users.bookingpal_id,
+                "isCompany": True,
+                "companyDetails": {
+                    "accountId": "132",
+                    "companyName": "Test PM company name",
+                    "language": "en",
+                    "fullName": f"{users.first_name} {users.last_name}",
+                    "companyAddress": {
+                        "country": users.country,
+                        "state": users.state,
+                        "streetAddress": users.address,
+                        "city": users.city,
+                        "zip": users.postal_code
+                    },
+                    "website": users.website,
+                    "email": users.user.email,
+                    "phone": {
+                        "countryCode": "321",
+                        "number": users.phone
+                    },
+                    "currency": "USD"
+                },
+            }
+        }
+        response, data = PropertyManager().update(payload)
         messages.success(request, 'Row updated Successfully.')
         return redirect ('/profile')
 

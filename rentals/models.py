@@ -33,6 +33,7 @@ class UserProfile(models.Model):
     birth_date=models.CharField(max_length=100)
     description=models.TextField(max_length=1000)
     status = models.BooleanField(default=True)
+    bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
    
 
 
@@ -260,6 +261,7 @@ class Rental(models.Model):
     user_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
+    bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:  
         db_table = "rental" 
@@ -375,6 +377,7 @@ class RentalsGallery(models.Model):
     position = models.PositiveSmallIntegerField(null=True)
     user_id = models.IntegerField()
     rental_id=models.IntegerField()
+    bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:  
         db_table = "rentals_gallery"
@@ -756,6 +759,7 @@ class BasicRates(models.Model):
     status = models.BooleanField(default=True)
     user_id = models.IntegerField()
     rental_id = models.IntegerField()
+    bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
     class Meta:  
         db_table = "rental_basic_rates"
 
