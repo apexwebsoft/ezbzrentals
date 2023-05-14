@@ -1430,6 +1430,7 @@ def rental_extra_services_insert(request,id):
 
 @login_required(login_url='/')
 def rental_extra_services_update(request,id):
+    rental=Rental.objects.get(id=id)
     if request.method == "POST": 
         extraservices=ExtraServices.objects.get(id=id)
         extraservices.service_name=request.POST.get('service_name')

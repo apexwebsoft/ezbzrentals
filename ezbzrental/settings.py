@@ -91,9 +91,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ezbz',
-        'USER': 'django',
+        'USER': 'diwaker',#django
+        # 'USER': 'django',
         #'USER': 'root',
-        'PASSWORD': 'India@2023',
+        'PASSWORD': 'diwaker', #India@2023
+        # 'PASSWORD': 'India@2023',
         #'PASSWORD': 'Mysql@2022',
         'HOST': 'localhost',
         'PORT': '3306', 
