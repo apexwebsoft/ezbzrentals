@@ -15,7 +15,7 @@ class Login:
             "message":"",
             "errorMessage":[],
             "code":"",
-            "token":"e481809a5e7b82b5894ab501d3ccbd35/53d585d5-77ac-45a0-a720-8a19ac59715a",
+            "token":"e481809a5e794ab501d3ccbd35/53d585d5-77ac-45a0-a720-8a19ac59715a",
             "partyId":879374356,
             "organizationId":879374211,
             "name":"Test_Company",
@@ -78,6 +78,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -94,6 +95,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -108,6 +110,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -139,6 +142,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -159,6 +163,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -175,6 +180,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -192,6 +198,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -209,6 +216,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -225,6 +233,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -241,6 +250,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -273,6 +283,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -289,6 +300,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -306,6 +318,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -338,6 +351,7 @@ class RatesAndAvailability:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -356,6 +370,7 @@ class RatesAndAvailability:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -388,6 +403,7 @@ class LosPricing:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -421,6 +437,7 @@ class LosPricing:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -453,6 +470,7 @@ class FeeAndTax:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -468,52 +486,7 @@ class FeeAndTax:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                return True, response.json()
-        else:
-            print("Some error occurred!!")
-            print(response)
-            print(response.content)
-
-class DistributeBooking:
-    """
-    Utiliy class to create and fetch Fee & Tax of product
-
-    Documentation: https://developerstesting.channelconnector.com/documentation#/rest/api-endpoints/fee-and-tax/create-fee-and-tax
-    """
-    headers = {
-        'Accept': 'application/json',
-        'X-API-key': API_KEY
-    }
-    def __init__(self):
-        res, token = Login(pms_user=True).get_token()
-        if not res:
-            raise Exception("Login failed!!")
-        else:
-            self.token = token
-
-    def fetch_all(self):
-        url = f"{API_BASE_URL}/taxfee/{product_id}?jwt={self.token}"
-        response = requests.request("GET", url, headers=self.headers)
-        if response.status_code == 200:
-            if response.json().get('is_error'):
-                print(response.json().get('errorMessage'))
-                return False, {}
-            else:
-                return True, response.json()
-        else:
-            print("Some error occurred!!")
-            print(response.text)
-
-    def create(self, payload):
-        url = f"{API_BASE_URL}/channel-configuration?jwt={self.token}"
-        # headers = self.headers
-        # headers['Content-Type'] = 'application/json'
-        response = requests.request("GET", url, headers=self.headers) #, json=payload
-        if response.status_code == 200:
-            if response.json().get('is_error'):
-                print(response.json().get('errorMessage'))
-                return False, {}
-            else:
+                print(response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
