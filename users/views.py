@@ -28,8 +28,6 @@ from django.contrib.auth import authenticate, login, logout
 from users.tokens import generate_token
 import ast
 
-from .booking_pal_api import RatesAndAvailability
-
 # Create your views here.
 
 
@@ -439,77 +437,6 @@ def rental_insert(request):
         rentaldeposit.user_id=request.user.id
         rentaldeposit.rental_id=LastRow.id
         rentaldeposit.save()
-        # payload = {
-        #     "data": {
-        #         "productId": 1237790325, #rental.bookingpal_id,
-        #         "leadTime": 1,
-        #         "rates": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "amount": 1
-        #         }
-        #         ],
-        #         "minStays": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "minStay": 1
-        #         }
-        #         ],
-        #         "maxStays": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "maxStay": 1
-        #         }
-        #         ],
-        #         "restrictions": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "checkIn": {
-        #                 "monday": True,
-        #                 "tuesday": True,
-        #                 "wednesday": True,
-        #                 "thursday": True,
-        #                 "friday": True,
-        #                 "saturday": True,
-        #                 "sunday": True
-        #             },
-        #             "checkOut": {
-        #                 "monday": True,
-        #                 "tuesday": True,
-        #                 "wednesday": True,
-        #                 "thursday": True,
-        #                 "friday": True,
-        #                 "saturday": True,
-        #                 "sunday": True
-        #             }
-        #         }
-        #         ],
-        #         "availabilities": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "availability": True
-        #         }
-        #         ],
-        #         "availableCount": [
-        #         {
-        #             "beginDate": "2023-05-01",
-        #             "endDate": "2023-05-31",
-        #             "count": 1,
-        #             "bookedRooms": 1,
-        #             "totalRooms": 1
-        #         }
-        #         ]
-        #     }
-        # }
-        # response, data = RatesAndAvailability().create(payload)
-        # if response:
-        #     basicrates.bookingpal_id = data.get('data')[0].get('id') #TODO: Make changes to not wait for the id
-        #     basicrates.save()
         path1 ="/rentals/overview/"
         path2=str(LastInsertId)
         path = path1+path2
@@ -601,75 +528,6 @@ def rental_update(request, id):
         rental.rental_short_description=request.POST.get('rental_short_description')
         rental.rental_description=request.POST.get('rental_description')
         rental.save()
-        basicrate_id = BasicRates.objects.get(rental_id=rental.id).bookingpal_id
-        payload = {
-            "data": {
-                "productId": basicrate_id,
-                "leadTime": 1,
-                "rates": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "amount": 2
-                }
-                ],
-                "minStays": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "minStay": 2
-                }
-                ],
-                "maxStays": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "maxStay": 2
-                }
-                ],
-                "restrictions": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "checkIn": {
-                        "monday": True,
-                        "tuesday": True,
-                        "wednesday": True,
-                        "thursday": True,
-                        "friday": True,
-                        "saturday": True,
-                        "sunday": True
-                    },
-                    "checkOut": {
-                        "monday": True,
-                        "tuesday": True,
-                        "wednesday": True,
-                        "thursday": True,
-                        "friday": True,
-                        "saturday": True,
-                        "sunday": True
-                    }
-                }
-                ],
-                "availabilities": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "availability": True
-                }
-                ],
-                "availableCount": [
-                {
-                    "beginDate": "2023-05-01",
-                    "endDate": "2023-05-31",
-                    "count": 2,
-                    "bookedRooms": 2,
-                    "totalRooms": 2
-                }
-                ]
-            }
-        }
-        response, data = RatesAndAvailability().create(payload)
         path1 ="/rentals/basic/"
         path2=str(id)
         path = path1+path2

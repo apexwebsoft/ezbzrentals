@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+import inspect
 
 API_BASE_URL = settings.BOOKINGPAL_API_URL
 API_KEY = settings.BOOKINGPAL_API_KEY
@@ -78,7 +79,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -95,7 +96,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -110,7 +111,7 @@ class PropertyManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -142,7 +143,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -163,7 +164,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -180,7 +181,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -198,7 +199,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -216,7 +217,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -233,7 +234,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -250,7 +251,7 @@ class ProductManager:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -283,7 +284,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -300,7 +301,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -318,7 +319,7 @@ class ProductImages:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -351,7 +352,7 @@ class RatesAndAvailability:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -370,7 +371,7 @@ class RatesAndAvailability:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -403,7 +404,7 @@ class LosPricing:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -437,7 +438,7 @@ class LosPricing:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -470,7 +471,7 @@ class FeeAndTax:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")
@@ -486,7 +487,7 @@ class FeeAndTax:
                 print(response.json().get('errorMessage'))
                 return False, {}
             else:
-                print(response.json())
+                print("\n\n" + inspect.stack()[0][3], response.json())
                 return True, response.json()
         else:
             print("Some error occurred!!")

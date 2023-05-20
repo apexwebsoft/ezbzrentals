@@ -1,7 +1,8 @@
-from rentals.models import ExtraServices, Rental, RentalLocation, RentalRoom, RentalTax, RentalsGallery, UserProfile
+from rentals.models import ExtraServices, LongStayDiscount, Rental, RentalLocation, RentalRoom, RentalTax, RentalsGallery, SeasonalRates, UserProfile
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from users.booking_pal_api import FeeAndTax, ProductImages, ProductManager, PropertyManager
+from users.booking_pal_api import FeeAndTax, LosPricing, ProductImages, ProductManager, PropertyManager, RatesAndAvailability
+from datetime import datetime
 
 
 @receiver(post_save, sender=UserProfile)
@@ -50,12 +51,12 @@ def create_update_rental_product(sender, instance, created, **kwargs):
             "propertyType": "PCT102",
             "currency": "USD",
             "location": {
-                "postalCode": rental_location.postal if rental_location.first() else "901821",
-                "country": rental_location.country if rental_location.first() else "US",
-                "region": rental_location.state if rental_location.first() else "Illinois",
-                "city": rental_location.city if rental_location.first() else "Chicago",
-                "street": rental_location.address if rental_location.first() else "210 North Wells Street",
-                "zipCode9": rental_location.postal if rental_location.first() else "901821"
+                "postalCode": rental_location.first().postal if rental_location.first() else "901821",
+                "country": rental_location.first().country if rental_location.first() else "US",
+                "region": rental_location.first().state if rental_location.first() else "Illinois",
+                "city": rental_location.first().city if rental_location.first() else "Chicago",
+                "street": rental_location.first().address if rental_location.first() else "210 North Wells Street",
+                "zipCode9": rental_location.first().postal if rental_location.first() else "901821"
             },
         }
     }
@@ -76,7 +77,8 @@ def create_update_rental_product(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Rental)
 def delete_rental_product(sender, instance, using, **kwargs):
-    response, data = ProductManager().delete(instance.bookingpal_id)
+    if instance.bookingpal_id:
+        response, data = ProductManager().delete(instance.bookingpal_id)
 
 @receiver(post_save, sender=RentalLocation)
 def update_rental_location(sender, instance, created, **kwargs):
@@ -86,18 +88,18 @@ def update_rental_location(sender, instance, created, **kwargs):
         "data": {
             "id": rental.bookingpal_id,
             "name": rental.rental_name,
-            "rooms": rental_room.no_of_rooms if rental_room else 1,
-            "bathrooms": rental_room.no_of_rooms if rental_room else 1,
+            "rooms": eval(rental_room.no_of_rooms)[2] if rental_room else 1,
+            "bathrooms": eval(rental_room.no_of_rooms)[1] if rental_room else 1,
             "persons": 2,
             "propertyType": "PCT102",
             "currency": "USD",
             "location": {
-                "postalCode": instance.postal,
-                "country": instance.country,
-                "region": instance.state,
-                "city": instance.city,
-                "street": instance.address,
-                "zipCode9": instance.postal
+                "postalCode": instance.postal if instance.postal else "901821",
+                "country": instance.country if instance.country else "US",
+                "region": instance.state if instance.state else "Illinois",
+                "city": instance.city if instance.city else "Chicago",
+                "street": instance.address if instance.address else "210 North Wells Street",
+                "zipCode9": instance.postal if instance.postal else "901821"
             },
         }
     }
@@ -105,25 +107,25 @@ def update_rental_location(sender, instance, created, **kwargs):
     response, data = ProductManager().update(payload)
 
 @receiver(post_save, sender=RentalRoom)
-def update_rental_location(sender, instance, created, **kwargs):
+def update_rental_rooms(sender, instance, created, **kwargs):
     rental = Rental.objects.get(id=instance.rental_id)
     rental_location = RentalLocation.objects.filter(rental_id=rental.id).first()
     payload = {
         "data": {
             "id": rental.bookingpal_id,
-            "name": rental.name,
-            "rooms": instance.no_of_rooms,
-            "bathrooms": instance.no_of_rooms,
+            "name": rental.rental_name,
+            "rooms": instance.no_of_rooms[2],
+            "bathrooms": instance.no_of_rooms[1],
             "persons": 2,
             "propertyType": "PCT102",
             "currency": "USD",
             "location": {
-                "postalCode": rental_location.postal if rental_location.first() else "901821",
-                "country": rental_location.country if rental_location.first() else "US",
-                "region": rental_location.state if rental_location.first() else "Illinois",
-                "city": rental_location.city if rental_location.first() else "Chicago",
-                "street": rental_location.address if rental_location.first() else "210 North Wells Street",
-                "zipCode9": rental_location.postal if rental_location.first() else "60606-1330"
+                "postalCode": rental_location.postal if rental_location else "901821",
+                "country": rental_location.country if rental_location else "US",
+                "region": rental_location.state if rental_location else "Illinois",
+                "city": rental_location.city if rental_location else "Chicago",
+                "street": rental_location.address if rental_location else "210 North Wells Street",
+                "zipCode9": rental_location.postal if rental_location else "60606-1330"
             },
         }
     }
@@ -150,19 +152,20 @@ def create_rental_image(sender, instance, created, **kwargs):
             instance.bookingpal_id = data.get('data')[0].get('id')
             instance.save()
 
-@receiver(pre_delete, sender=Rental)
-def delete_rental_product(sender, instance, using, **kwargs):
-    payload = {
-        "data": {
-            "productId": instance.bookingpal_id,
-            "images": [
-                {
-                    "url": instance.image.url
-                }
-            ]
+@receiver(pre_delete, sender=RentalsGallery)
+def delete_rental_product_image(sender, instance, using, **kwargs):
+    if instance.bookinpal_id:
+        payload = {
+            "data": {
+                "productId": instance.bookingpal_id,
+                "images": [
+                    {
+                        "url": instance.image.url
+                    }
+                ]
+            }
         }
-    }
-    response, data = ProductImages.delete(payload)
+        response, data = ProductImages.delete(payload)
 
 @receiver(post_save, sender=RentalTax)
 @receiver(post_save, sender=ExtraServices)
@@ -178,7 +181,7 @@ def create_update_rental_fee_tax(sender, instance, created, **kwargs):
                         "feeType": "GENERAL",
                         "name": instance.service_name,
                         "unit": "PER_STAY",
-                        "value": int(instance.service_price),
+                        "value": int(instance.service_price) if instance.service_price else 0,
                         "valueType": "FLAT"
                     })
         payload["data"]["fees"] = fees
@@ -192,3 +195,109 @@ def create_update_rental_fee_tax(sender, instance, created, **kwargs):
                 )
         payload["data"]["taxes"] = taxes
     response, data = FeeAndTax().create(payload)
+
+@receiver(post_save, sender=SeasonalRates)
+def create_update_rental_rates(sender, instance, created, **kwargs):
+    rental = Rental.objects.get(id=instance.rental_id)
+    start_date =  datetime.strptime(instance.start_date, "%d %b, %Y").strftime("%Y-%m-%d")
+    end_date =  datetime.strptime(instance.end_date, "%d %b, %Y").strftime("%Y-%m-%d")
+
+    payload = {
+        "data": {
+            "productId": rental.bookingpal_id,
+            "rates": [
+            {
+                "beginDate": start_date,
+                "endDate": end_date,
+                "amount": instance.basic_night
+            }
+            ],
+            "minStays": [
+            {
+                "beginDate": start_date,
+                "endDate": end_date,
+                "minStay": instance.minimum_stay
+            }
+            ],
+            "maxStays": [
+            {
+                "beginDate": start_date,
+                "endDate": end_date,
+                "maxStay": instance.maximum_stay
+            }
+            ],
+            "restrictions": [
+            {
+               "beginDate": start_date,
+                "endDate": end_date,
+                "checkIn": {
+                    "monday": True if "Mon" in instance.checkin_days else False,
+                    "tuesday": True if "Tue" in instance.checkin_days else False,
+                    "wednesday": True if "Wed" in instance.checkin_days else False,
+                    "thursday": True if "Thu" in instance.checkin_days else False,
+                    "friday": True if "Fri" in instance.checkin_days else False,
+                    "saturday": True if "Sat" in instance.checkin_days else False,
+                    "sunday": True if "Sun" in instance.checkin_days else False
+                },
+                "checkOut": {
+                    "monday": True if "Mon" in instance.checkin_days else False,
+                    "tuesday": True if "Tue" in instance.checkin_days else False,
+                    "wednesday": True if "Wed" in instance.checkin_days else False,
+                    "thursday": True if "Thu" in instance.checkin_days else False,
+                    "friday": True if "Fri" in instance.checkin_days else False,
+                    "saturday": True if "Sat" in instance.checkin_days else False,
+                    "sunday": True if "Sun" in instance.checkin_days else False
+                }
+            }
+            ]
+        }
+    }
+    response, data = RatesAndAvailability().create(payload)
+
+@receiver(post_save, sender=LongStayDiscount)
+def create_update_rental_losdiscount(sender, instance, created, **kwargs):
+    rental = Rental.objects.get(id=instance.rental_id)
+
+    response, data = ProductManager().fetch_one(rental.bookingpal_id)
+    bookingpal_rental_data = data.get("data")[0]
+    if not bookingpal_rental_data.get("supportedLosRates", False):
+        payload = {
+            "data": {
+                "id": bookingpal_rental_data.get("id"),
+                "name": bookingpal_rental_data.get("name"),
+                "rooms": bookingpal_rental_data.get("rooms"),
+                "bathrooms": bookingpal_rental_data.get("bathrooms"),
+                "persons": bookingpal_rental_data.get("persons"),
+                "propertyType": bookingpal_rental_data.get("propertyType"),
+                "currency": bookingpal_rental_data.get("currency"),
+                "location": {
+                    "postalCode": bookingpal_rental_data.get("location").get("postalCode"),
+                    "country": bookingpal_rental_data.get("location").get("country"),
+                    "region": bookingpal_rental_data.get("location").get("region"),
+                    "city": bookingpal_rental_data.get("location").get("city"),
+                    "street": bookingpal_rental_data.get("location").get("street"),
+                    "zipCode9": bookingpal_rental_data.get("location").get("zipCode9")
+                },
+                "supportedLosRates": True
+            }
+        }
+        response, data = ProductManager().update(payload)
+
+    payload = {
+        "data": {
+            "productId": rental.bookingpal_id,
+            "losRates": [
+            {
+                "checkInDate": datetime.today().strftime("%Y-%m-%d"),
+                "maxGuests": bookingpal_rental_data.get("persons"),
+                "losValue": [
+                    instance.seven_nights if instance.seven_nights else 0,
+                    instance.fourteen_nights if instance.fourteen_nights else 0,
+                    instance.twenty_one_nights if instance.twenty_one_nights else 0,
+                    instance.twenty_eight_nights if instance.twenty_eight_nights else 0
+                ]
+            }
+            ]
+        }
+    }
+    response, data = LosPricing().create(payload)
