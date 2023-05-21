@@ -11,8 +11,8 @@ def create_update_property_manager(sender, instance, created, **kwargs):
         "data": {
             "isCompany": False,
             "companyDetails": {
-                "companyName": instance.user.get_full_name(),
-                "fullName": instance.user.get_full_name(),
+                "companyName": f"{instance.first_name} {instance.last_name}",
+                "fullName": f"{instance.first_name} {instance.last_name}",
                 "companyAddress": {
                     "country": instance.country,
                     "state": instance.state,
@@ -47,6 +47,7 @@ def create_update_rental_product(sender, instance, created, **kwargs):
             "name": instance.rental_name,
             "rooms": 1,
             "bathrooms": 1,
+            "livingRoom": 1,
             "persons": 2,
             "propertyType": "PCT102",
             "currency": "USD",
@@ -90,6 +91,7 @@ def update_rental_location(sender, instance, created, **kwargs):
             "name": rental.rental_name,
             "rooms": eval(rental_room.no_of_rooms)[2] if rental_room else 1,
             "bathrooms": eval(rental_room.no_of_rooms)[1] if rental_room else 1,
+            "livingRoom": eval(rental_room.no_of_rooms)[5] if rental_room else 1,
             "persons": 2,
             "propertyType": "PCT102",
             "currency": "USD",
@@ -116,6 +118,7 @@ def update_rental_rooms(sender, instance, created, **kwargs):
             "name": rental.rental_name,
             "rooms": instance.no_of_rooms[2],
             "bathrooms": instance.no_of_rooms[1],
+            "livingRoom": instance.no_of_rooms[5],
             "persons": 2,
             "propertyType": "PCT102",
             "currency": "USD",
@@ -267,6 +270,7 @@ def create_update_rental_losdiscount(sender, instance, created, **kwargs):
                 "name": bookingpal_rental_data.get("name"),
                 "rooms": bookingpal_rental_data.get("rooms"),
                 "bathrooms": bookingpal_rental_data.get("bathrooms"),
+                "livingRoom": bookingpal_rental_data.get("livingRoom"),
                 "persons": bookingpal_rental_data.get("persons"),
                 "propertyType": bookingpal_rental_data.get("propertyType"),
                 "currency": bookingpal_rental_data.get("currency"),

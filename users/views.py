@@ -297,6 +297,7 @@ def rental_insert(request):
         rental.rental_short_description=request.POST.get('rental_short_description')
         rental.rental_description=request.POST.get('rental_description')
         rental.cover_image=request.FILES.get('cover_image')
+        rental.status= True if request.POST.get('status', False) == "on" else False
         rental.user_id=request.user.id
         rental.save()
         LastInsertId = (Rental.objects.last()).id
@@ -526,6 +527,7 @@ def rental_update(request, id):
         if 'cover_image' in request.FILES:
           rental.cover_image=request.FILES.get('cover_image')
         rental.rental_short_description=request.POST.get('rental_short_description')
+        rental.status=True if request.POST.get('status', False) == "on" else False
         rental.rental_description=request.POST.get('rental_description')
         rental.save()
         path1 ="/rentals/basic/"
