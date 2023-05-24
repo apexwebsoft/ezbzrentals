@@ -14,6 +14,10 @@ import pymysql
 pymysql.install_as_MySQLdb()
 from . info import *
 
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -90,11 +94,9 @@ WSGI_APPLICATION = 'ezbzrental.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ezbz',
-        'USER': 'django',
-        # 'USER': 'root',
-        'PASSWORD': 'India@2023',
-        # 'PASSWORD': 'Mysql@2022',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '3306',
 
