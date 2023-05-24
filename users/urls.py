@@ -78,6 +78,7 @@ urlpatterns = [
     path('rentals/instruction-update/<int:id>', views.rental_instruction_update),
     path('rentals/select-channels/<int:id>', views.rental_select_channels),
     path('rentals/channel-update/<int:id>', views.rental_channel_update),
+    path('bookingpal-info/',views.bookingpal_info),
 
 
 # Channels  
