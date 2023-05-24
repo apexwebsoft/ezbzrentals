@@ -1,3 +1,4 @@
+from users.booking_pal_api import BookingpalNotificationLinks
 from users.serializers import BookingsSerializer, RentalSerializer, RentalBasicSerializer, RentalGallerySerializer, RentalLocationSerializer, RentalOtherRoomSerializer, RentalAmenitiesSerializer, RentalBasicRatesSerializer, RentalSeasonalRatesSerializer, RentalDepositSerializer, RentalLongStayDiscountSerializer, RentalEarlyBirdDiscountSerializer, RentalCleaningSerializer, RentalTaxSerializer, RentalExtraServicesSerializer, RentalCustomServicesSerializer, RentalHouseRulesSerializer, RentalPolicySerializer, RentalInstructionSerializer
 from email.policy import Policy
 import json
@@ -2780,3 +2781,34 @@ def rental_booking_rules_update(request,id):
         bookingrules.save()
         messages.success(request, 'Data Updated Successfully.')
     return redirect(request.META.get('HTTP_REFERER')) 
+
+
+def bookingpal_info(request):
+    """
+    Doc: https://developerstesting.channelconnector.com/documentation#/rest/api-endpoints/push-notification/push-notification-links
+    Sample payload:
+    {
+        "data": {
+            "bookLink": "https://newreservationnotification.link",
+            "cancelLink": "https://cancelreservation.link",
+            "asyncPush": "https://asyncpush.link",
+            "requestToBook": "https://requestToBook.link",
+            "reservationLink": "https://reservation.link"
+        }
+    }
+    """
+    if request.method == "POST":
+        payload = {
+            "data": {
+                "bookLink": request.POST.get("bookLink", "https://newreservationnotification.link"),
+                "cancelLink": request.POST.get("cancelLink", "https://cancelreservation.link"),
+                "asyncPush": request.POST.get("asyncPush", "https://asyncpush.link"),
+                "requestToBook": request.POST.get("requestToBook", "https://requestToBook.link"),
+                "reservationLink": request.POST.get("reservationLink", "https://reservation.link")
+            }
+        }
+        response, data = BookingpalNotificationLinks().create(payload)
+        return JsonResponse(data)
+    else:
+        response, data = BookingpalNotificationLinks().fetch_all()
+        return JsonResponse(data)

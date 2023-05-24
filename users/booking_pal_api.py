@@ -116,6 +116,20 @@ class PropertyManager:
         else:
             print("Some error occurred!!")
             print(response.text)
+    
+    def fetch_reservations(self):
+        url = f"{API_BASE_URL}/reservation?jwt={self.token}"
+        response = requests.request("GET", url, headers=self.headers)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response.text)
 
 
 class ProductManager:
@@ -258,6 +272,20 @@ class ProductManager:
             print(response)
             print(response.content)
 
+    def fetch_reservations(self, product_id):
+        url = f"{API_BASE_URL}/reservation/{product_id}?jwt={self.token}"
+        response = requests.request("GET", url, headers=self.headers)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response)
+            print(response.content)
 
 class ProductImages:
     """
@@ -479,6 +507,103 @@ class FeeAndTax:
 
     def create(self, payload):
         url = f"{API_BASE_URL}/taxfee?jwt={self.token}"
+        headers = self.headers
+        headers['Content-Type'] = 'application/json'
+        response = requests.request("POST", url, headers=headers, json=payload)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response)
+            print(response.content)
+
+
+class RentalReservation:
+    """
+    Utiliy class to fetch Reservations and create notifications
+
+    Documentation: https://developerstesting.channelconnector.com/documentation#/rest/api-endpoints/reservation-notifications/general-reservation-notification-push
+    """
+    headers = {
+        'Accept': 'application/json',
+        'X-API-key': API_KEY
+    }
+    def __init__(self):
+        res, token = Login().get_token()
+        if not res:
+            raise Exception("Login failed!!")
+        else:
+            self.token = token
+    
+    def fetch_all(self):
+        url = f"{API_BASE_URL}/reservation?jwt={self.token}"
+        response = requests.request("GET", url, headers=self.headers)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response.text)
+
+    def create(self, payload):
+        url = f"{API_BASE_URL}/reservation?jwt={self.token}"
+        headers = self.headers
+        headers['Content-Type'] = 'application/json'
+        response = requests.request("POST", url, headers=headers, json=payload)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response)
+            print(response.content)
+
+class BookingpalNotificationLinks:
+    """
+    Utiliy class to create and fetch Bookingpal Notification Links
+
+    Documentation: https://developerstesting.channelconnector.com/documentation#/rest/api-endpoints/push-notification/push-notification-links
+    """
+    headers = {
+        'Accept': 'application/json',
+        'X-API-key': API_KEY
+    }
+    def __init__(self):
+        res, token = Login(True).get_token()
+        if not res:
+            raise Exception("Login failed!!")
+        else:
+            self.token = token
+    
+    def fetch_all(self):
+        url = f"{API_BASE_URL}/info?jwt={self.token}"
+        response = requests.request("GET", url, headers=self.headers)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response.text)
+
+    def create(self, payload):
+        url = f"{API_BASE_URL}/info?jwt={self.token}"
         headers = self.headers
         headers['Content-Type'] = 'application/json'
         response = requests.request("POST", url, headers=headers, json=payload)

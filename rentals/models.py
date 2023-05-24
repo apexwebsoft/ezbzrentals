@@ -417,6 +417,7 @@ class Bookings(models.Model):
     status = models.BooleanField(default=True)
     user_id = models.IntegerField()
     created_at = models.DateField()
+    bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
    
    
     class Meta:  
