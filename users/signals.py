@@ -1,4 +1,4 @@
-from rentals.models import ExtraServices, LongStayDiscount, Rental, RentalLocation, RentalRoom, RentalTax, RentalsGallery, SeasonalRates, UserProfile
+from rentals.models import BasicRates, Country, ExtraServices, HouseRules, LongStayDiscount, Rental, RentalAmenities, RentalBasic, RentalLocation, RentalRoom, RentalTax, RentalsGallery, SeasonalRates, UserProfile, AccountSetting
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from users.booking_pal_api import FeeAndTax, LosPricing, ProductImages, ProductManager, PropertyManager, RatesAndAvailability
@@ -6,29 +6,33 @@ from datetime import datetime
 
 
 @receiver(post_save, sender=UserProfile)
+@receiver(post_save, sender=AccountSetting)
 def create_update_property_manager(sender, instance, created, **kwargs):
-    payload = {
-        "data": {
-            "isCompany": False,
-            "companyDetails": {
-                "companyName": f"{instance.first_name} {instance.last_name}",
-                "fullName": f"{instance.first_name} {instance.last_name}",
-                "companyAddress": {
-                    "country": instance.country,
-                    "state": instance.state,
-                    "streetAddress": instance.address,
-                    "city": instance.city,
-                    "zip": instance.postal_code
+    if created and sender == UserProfile:
+        user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
+        country = Country.objects.filter(code=instance.country).first()
+        payload = {
+            "data": {
+                "isCompany": False,
+                "companyDetails": {
+                    "companyName": f"{instance.first_name} {instance.last_name}",
+                    "fullName": f"{instance.first_name} {instance.last_name}",
+                    "companyAddress": {
+                        "country": instance.country,
+                        "state": instance.state,
+                        "streetAddress": instance.address,
+                        "city": instance.city,
+                        "zip": instance.postal_code
+                    },
+                    "email": instance.user.email,
+                    "phone": {
+                        "countryCode": "+"+country.country_code if country else "+1",
+                        "number": instance.phone
+                    },
                 },
-                "email": instance.user.email,
-                "phone": {
-                    "countryCode": "+1",
-                    "number": instance.phone
-                },
-            },
+                "currency": user_acc_setting.prefered_currency if user_acc_setting else 'USD',
+            }
         }
-    }
-    if created:
         # Create property manager in BookingPal
         response, data = PropertyManager().create(payload)
         if response:
@@ -36,104 +40,201 @@ def create_update_property_manager(sender, instance, created, **kwargs):
             instance.save()
     else:
         # Update property manager in BookingPal
-        payload["data"]["id"] = instance.bookingpal_id
+        if sender==AccountSetting:
+            res, data = PropertyManager().fetch_one(instance.user.bookingpal_id)
+        else:
+            res, data = PropertyManager().fetch_one(instance.bookingpal_id)
+        payload = {"data": data.get("data")[0]}
+        if sender == AccountSetting:
+            payload["data"]["currency"] = instance.prefered_currency
+        elif sender == UserProfile:
+            payload["data"]["companyDetails"]["companyName"] = instance.prefered_currency
+            payload["data"]["companyDetails"]["fullName"] = f"{instance.first_name} {instance.last_name}",
+            payload["data"]["companyDetails"]["companyAddress"]["country"] = instance.country
+            payload["data"]["companyDetails"]["companyAddress"]["state"] = instance.state
+            payload["data"]["companyDetails"]["companyAddress"]["streetAddress"] = instance.streetAddress
+            payload["data"]["companyDetails"]["companyAddress"]["city"] = instance.city
+            payload["data"]["companyDetails"]["companyAddress"]["zip"] = instance.zip
+            payload["data"]["companyDetails"]["email"] = instance.user.email
+            payload["data"]["companyDetails"]["phone"]["countryCode"] = "+"+country.country_code if country else "+1"
+            payload["data"]["companyDetails"]["phone"]["number"] = instance.phone
         response, data = PropertyManager().update(payload)
 
 @receiver(post_save, sender=Rental)
+@receiver(post_save, sender=RentalRoom)
+@receiver(post_save, sender=RentalLocation)
+@receiver(post_save, sender=BasicRates)
+@receiver(post_save, sender=HouseRules)
+@receiver(post_save, sender=RentalAmenities)
 def create_update_rental_product(sender, instance, created, **kwargs):
-    rental_location = RentalLocation.objects.filter(rental_id=instance.id)
-    payload = {
-        "data": {
-            "name": instance.rental_name,
-            "rooms": 1,
-            "bathrooms": 1,
-            "livingRoom": 1,
-            "persons": 2,
-            "propertyType": "PCT102",
-            "currency": "USD",
-            "location": {
-                "postalCode": rental_location.first().postal if rental_location.first() else "901821",
-                "country": rental_location.first().country if rental_location.first() else "US",
-                "region": rental_location.first().state if rental_location.first() else "Illinois",
-                "city": rental_location.first().city if rental_location.first() else "Chicago",
-                "street": rental_location.first().address if rental_location.first() else "210 North Wells Street",
-                "zipCode9": rental_location.first().postal if rental_location.first() else "901821"
-            },
+    rental_type, space, space_unit, permit_nbr = "PCT102", "1", "SQ_M", "dummy"
+    if created and sender == Rental:
+        user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
+        payload = {
+            "data": {
+                "name": instance.rental_name,
+                "rooms": 1,
+                "bathrooms": 1,
+                "livingRoom": 1,
+                "persons": 2,
+                "propertyType": rental_type,
+                "space": space,
+                "spaceUnit": space_unit,
+                "currency": user_acc_setting.prefered_currency if user_acc_setting else 'USD',
+                "location": {
+                    "postalCode": "901821",
+                    "country": "US",
+                    "region": "Illinois",
+                    "city": "Chicago",
+                    "street": "210 North Wells Street",
+                    "zipCode9": "901821"
+                },
+                "notes": {
+                    "description": {
+                        "texts": [
+                            {
+                            "language": "EN",
+                            "value": instance.rental_description
+                            }
+                        ]
+                    },
+                    "shortDescription": {
+                        "texts": [
+                            {
+                            "language": "EN",
+                            "value": instance.rental_short_description
+                            }
+                        ]
+                    },
+                },
+                "taxNumber": permit_nbr
+            }
         }
-    }
-    if created:
         # Create property manager in BookingPal
         response, data = ProductManager().create(payload)
         if response:
             instance.bookingpal_id = data.get('data')[0].get('id')
             instance.save()
+        # Update cover image
+        if instance.cover_image and instance.bookingpal_id:
+            payload = {
+                "data": {
+                    "productId": instance.bookingpal_id,
+                    "image": {
+                        "url": instance.cover_image.url,
+                        "tags": []
+                    }
+                }
+            }
+            response, data = ProductImages().create(payload)
+            if response:
+                instance.bookingpal_img_id = data.get('data')[0].get('id')
+                instance.save()
     else:
-        # Update property manager in BookingPal
-        payload["data"]["id"] = instance.bookingpal_id
-        response, data = ProductManager().update(payload)
-        if instance.status:
-            response, data = ProductManager().activate([int(instance.bookingpal_id)])
+        if sender in [RentalLocation, RentalBasic, RentalRoom, BasicRates, HouseRules, RentalAmenities]:
+            rental = Rental.objects.get(id=instance.rental_id)
+            res, data = ProductManager().fetch_one(rental.bookingpal_id)
         else:
-            response, data = ProductManager().deactivate([int(instance.bookingpal_id)])
+            res, data = ProductManager().fetch_one(instance.bookingpal_id)
+
+        payload = {"data": data.get("data")[0]}
+        if sender == Rental:
+            user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
+            payload["data"]["currency"] = user_acc_setting.prefered_currency if user_acc_setting else 'USD'
+            payload["data"]["name"] = instance.rental_name
+            payload["data"]["notes"] = {
+                "description": {
+                    "texts": [
+                        {
+                        "language": "EN",
+                        "value": instance.rental_description
+                        }
+                    ]
+                },
+                "shortDescription": {
+                    "texts": [
+                        {
+                        "language": "EN",
+                        "value": instance.rental_short_description
+                        }
+                    ]
+                },
+            }
+        elif sender == RentalLocation:
+            payload["data"]["location"] = {
+                    "postalCode": instance.postal,
+                    "country": instance.country,
+                    "region": instance.state,
+                    "city": instance.city,
+                    "street": instance.address,
+                    "zipCode9": instance.postal
+                }
+        elif sender == RentalRoom:
+            payload["data"]["rooms"] = eval(instance.no_of_rooms)[2]
+            payload["data"]["bathrooms"] = eval(instance.no_of_rooms)[1]
+            payload["data"]["livingRoom"] = eval(instance.no_of_rooms)[5]
+        elif sender == RentalBasic:
+            rental_type, space, space_unit, permit_nbr = "PCT102", "1", "SQ_M", "dummy"
+            for key, val in RentalBasic.RENTAL_TYPE_DICT:
+                if val.lower() == instance.rental_type.lower():
+                    rental_type = key
+            space = int(instance.floorspace) if instance.floorspace else "1"
+            if instance.floorspace_units == "ft2":
+                space_unit = "SQ_FT"
+            else:
+                space_unit = "SQ_M"
+            permit_nbr = instance.rental_licence if instance.rental_licence else "dummy"
+            payload["data"]["propertyType"] = rental_type
+            payload["data"]["space"] = space
+            payload["data"]["spaceUnit"]: space_unit
+            payload["data"]["taxNumber"]: permit_nbr
+        elif sender == BasicRates:
+            payload["data"]["persons"] = instance.guest_number if instance.guest_number else 2
+        elif sender == HouseRules:
+            payload["data"]["policy"]["childrenAllowed"] = True if instance.for_kid not in ["Not suitable for children", "", None] else False
+            payload["data"]["policy"]["smokingAllowed"] = True if instance.smoking_allowed not in ["No smoking", "", None] else False
+            payload["data"]["policy"]["petPolicy"]["allowedPets"] = True if instance.pets not in ["No pets allowed", "", None] else False
+            payload["data"]["policy"]["petPolicy"]["chargePets"] = "Free"
+        elif sender == RentalAmenities:
+            payload["data"]["policy"]["childrenAllowed"] = True if "Children welcome" in eval(instance.aminities) else False
+            payload["data"]["policy"]["smokingAllowed"] = True if "Smoking allowed" in eval(instance.aminities) else False
+            payload["data"]["policy"]["petPolicy"]["allowedPets"] = True if "Pets allowed" in eval(instance.aminities) else False
+            payload["data"]["policy"]["petPolicy"]["chargePets"] = "Free"
+            if "Internet wireless" in eval(instance.aminities):
+                payload["data"]["policy"]["internetPolicy"] = {
+                    "accessInternet": False,
+                    "kindOfInternet": "WiFi",
+                    "availableInternet": "AllAreas",
+                    "chargeInternet": "Free"
+                }
+
+        # Update property manager in BookingPal
+        response, data = ProductManager().update(payload)
+        if sender == Rental:
+            if instance.status:
+                response, data = ProductManager().activate([int(instance.bookingpal_id)])
+            else:
+                response, data = ProductManager().deactivate([int(instance.bookingpal_id)])
+            # Update cover image
+            if instance.cover_image and instance.bookingpal_id:
+                payload = {
+                    "data": {
+                        "productId": instance.bookingpal_id,
+                        "image": {
+                            "url": instance.cover_image.url,
+                            "tags": []
+                        }
+                    }
+                }
+                response, data = ProductImages().create(payload)
+                if response:
+                    instance.bookingpal_img_id = data.get('data')[0].get('id')
+                    instance.save()
 
 @receiver(pre_delete, sender=Rental)
 def delete_rental_product(sender, instance, using, **kwargs):
     if instance.bookingpal_id:
         response, data = ProductManager().delete(instance.bookingpal_id)
-
-@receiver(post_save, sender=RentalLocation)
-def update_rental_location(sender, instance, created, **kwargs):
-    rental = Rental.objects.get(id=instance.rental_id)
-    rental_room = RentalRoom.objects.filter(rental_id=instance.rental_id).first()
-    payload = {
-        "data": {
-            "id": rental.bookingpal_id,
-            "name": rental.rental_name,
-            "rooms": eval(rental_room.no_of_rooms)[2] if rental_room else 1,
-            "bathrooms": eval(rental_room.no_of_rooms)[1] if rental_room else 1,
-            "livingRoom": eval(rental_room.no_of_rooms)[5] if rental_room else 1,
-            "persons": 2,
-            "propertyType": "PCT102",
-            "currency": "USD",
-            "location": {
-                "postalCode": instance.postal if instance.postal else "901821",
-                "country": instance.country if instance.country else "US",
-                "region": instance.state if instance.state else "Illinois",
-                "city": instance.city if instance.city else "Chicago",
-                "street": instance.address if instance.address else "210 North Wells Street",
-                "zipCode9": instance.postal if instance.postal else "901821"
-            },
-        }
-    }
-    # Update property manager in BookingPal
-    response, data = ProductManager().update(payload)
-
-@receiver(post_save, sender=RentalRoom)
-def update_rental_rooms(sender, instance, created, **kwargs):
-    rental = Rental.objects.get(id=instance.rental_id)
-    rental_location = RentalLocation.objects.filter(rental_id=rental.id).first()
-    payload = {
-        "data": {
-            "id": rental.bookingpal_id,
-            "name": rental.rental_name,
-            "rooms": instance.no_of_rooms[2],
-            "bathrooms": instance.no_of_rooms[1],
-            "livingRoom": instance.no_of_rooms[5],
-            "persons": 2,
-            "propertyType": "PCT102",
-            "currency": "USD",
-            "location": {
-                "postalCode": rental_location.postal if rental_location else "901821",
-                "country": rental_location.country if rental_location else "US",
-                "region": rental_location.state if rental_location else "Illinois",
-                "city": rental_location.city if rental_location else "Chicago",
-                "street": rental_location.address if rental_location else "210 North Wells Street",
-                "zipCode9": rental_location.postal if rental_location else "60606-1330"
-            },
-        }
-    }
-    # Update property manager in BookingPal
-    response, data = ProductManager().update(payload)
 
 @receiver(post_save, sender=RentalsGallery)
 def create_rental_image(sender, instance, created, **kwargs):
