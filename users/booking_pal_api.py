@@ -117,6 +117,20 @@ class PropertyManager:
             print("Some error occurred!!")
             print(response.text)
     
+    def fetch_one(self, pm_id):
+        url = f"{API_BASE_URL}/pm/{pm_id}?jwt={self.token}"
+        response = requests.request("GET", url, headers=self.headers)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response.text)
+
     def fetch_reservations(self):
         url = f"{API_BASE_URL}/reservation?jwt={self.token}"
         response = requests.request("GET", url, headers=self.headers)

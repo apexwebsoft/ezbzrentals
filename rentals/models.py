@@ -262,6 +262,7 @@ class Rental(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     bookingpal_id = models.CharField(max_length=15, null=True, blank=True)
+    bookingpal_img_id = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:  
         db_table = "rental" 
@@ -269,6 +270,7 @@ class Rental(models.Model):
         return self.rental_name      
 
 class RentalBasic(models.Model):
+    RENTAL_TYPE_DICT = {"PCT101":"Townhome", "PCT102":"Single Room", "PCT103":"Double Room", "PCT104":"Twin", "PCT105":"Twin/Double", "PCT106":"Triple Room", "PCT107":"Quadruple", "PCT108":"Family", "PCT109":"Suite", "PCT110":"Studio", "PCT111":"Bungalow", "PCT112":"Private room", "PCT113":"Shared room", "PCT114":"Cottage", "PCT115":"Apart Hotel", "PCT116":"Narrow boat", "PCT117":"Riad", "PCT118":"Shepherd Hut", "PCT119":"Tipi", "PCT12":"Cruise", "PCT120":"Tower", "PCT121":"Tree house", "PCT122":"Trullo", "PCT123":"Watermill", "PCT124":"Windmill", "PCT125":"Yacht", "PCT126":"Yurt", "PCT127":"Log Cabin", "PCT128":"Penthouse", "PCT14":"Ferry", "PCT15":"Guest farm", "PCT16":"Guest house limited service", "PCT18":"Holiday resort", "PCT19":"Hostel", "PCT20":"Hotel", "PCT21":"Inn", "PCT22":"Lodge", "PCT23":"Meeting resort", "PCT25":"Mobile-home", "PCT26":"Monastery", "PCT27":"Motel", "PCT28":"Ranch", "PCT29":"Residential apartment", "PCT3":"Apartment", "PCT30":"Resort", "PCT31":"Sailing ship", "PCT32":"Self catering accommodation", "PCT33":"Tent", "PCT34":"Vacation home", "PCT35":"Villa", "PCT36":"Wildlife reserve", "PCT37":"Castle", "PCT4":"Bed and breakfast", "PCT40":"Pension", "PCT41":"Ski Chalet", "PCT44":"Boatel", "PCT45":"Boutique", "PCT46":"Efficiency/studio", "PCT5":"Cabin or bungalow", "PCT50":"Recreational vehicle park", "PCT51":"Charm hotel", "PCT52":"Manor", "PCT6":"Campground", "PCT7":"Chalet", "PCT8":"Condominium"}
     rental_type=models.CharField(max_length=100)
     rental_basis=models.CharField(max_length=100) 
     floorspace=models.CharField(max_length=100) 
