@@ -632,3 +632,9 @@ class BookingpalNotificationLinks:
             print("Some error occurred!!")
             print(response)
             print(response.content)
+
+
+def declutter_payload(payload, clutter_list):
+    for clutter in clutter_list:
+        payload["data"].pop(clutter, None)
+    return payload
