@@ -316,6 +316,7 @@ def rental_insert(request):
         rentalbasic.rental_licence=""
         rentalbasic.user_id=request.user.id
         rentalbasic.rental_id=LastRow.id
+        rentalbasic.skip_signals=True
         rentalbasic.save()
 
         location=RentalLocation()
@@ -327,18 +328,21 @@ def rental_insert(request):
         location.postal=""
         location.user_id=request.user.id
         location.rental_id=LastRow.id
+        location.skip_signals=True
         location.save()
 
         rentalamenities=RentalAmenities()
         rentalamenities.amenities=""
         rentalamenities.user_id=request.user.id
         rentalamenities.rental_id=LastRow.id
+        rentalamenities.skip_signals=True
         rentalamenities.save()
 
         rentalchannel=ChannelManagement()
         rentalchannel.channels=""
         rentalchannel.user_id=request.user.id
         rentalchannel.rental_id=LastRow.id
+        rentalchannel.skip_signals=True
         rentalchannel.save()
 
 
@@ -351,6 +355,7 @@ def rental_insert(request):
         bookingrules.rates_decrease=""
         bookingrules.user_id=request.user.id
         bookingrules.rental_id=LastRow.id
+        bookingrules.skip_signals=True
         bookingrules.save()
 
 
@@ -362,6 +367,7 @@ def rental_insert(request):
         longstaydiscount.twenty_eight_nights=""
         longstaydiscount.user_id=request.user.id
         longstaydiscount.rental_id=LastRow.id
+        longstaydiscount.skip_signals=True
         longstaydiscount.save()
 
         earlybirddiscount=EarlyBirdDiscount()
@@ -371,6 +377,7 @@ def rental_insert(request):
         earlybirddiscount.booking_more_discount=""
         earlybirddiscount.user_id=request.user.id
         earlybirddiscount.rental_id=LastRow.id
+        earlybirddiscount.skip_signals=True
         earlybirddiscount.save()
 
         houserules=HouseRules()
@@ -382,6 +389,7 @@ def rental_insert(request):
         houserules.house_rules=""
         houserules.user_id=request.user.id
         houserules.rental_id=LastRow.id
+        houserules.skip_signals=True
         houserules.save()
 
         rentalpolicy=RentalPolicy()
@@ -389,6 +397,7 @@ def rental_insert(request):
         rentalpolicy.description=""
         rentalpolicy.user_id=request.user.id
         rentalpolicy.rental_id=LastRow.id
+        rentalpolicy.skip_signals=True
         rentalpolicy.save()
 
         rentalinstruction=RentalInstruction()
@@ -406,6 +415,7 @@ def rental_insert(request):
         rentalinstruction.property_directions=""
         rentalinstruction.user_id=request.user.id
         rentalinstruction.rental_id=LastRow.id
+        rentalinstruction.skip_signals=True
         rentalinstruction.save()
 
         basicrates=BasicRates()
@@ -417,6 +427,7 @@ def rental_insert(request):
         basicrates.maximum_stay=""
         basicrates.user_id=request.user.id
         basicrates.rental_id=LastRow.id
+        basicrates.skip_signals=True
         basicrates.save()
 
         rentalcleaning=RentalCleaning()
@@ -425,12 +436,14 @@ def rental_insert(request):
         rentalcleaning.price=""
         rentalcleaning.user_id=request.user.id
         rentalcleaning.rental_id=LastRow.id
+        rentalcleaning.skip_signals=True
         rentalcleaning.save()
 
         rentalotherrooms=RentalOtherRooms()
         rentalotherrooms.other_rooms=""
         rentalotherrooms.user_id=request.user.id
         rentalotherrooms.rental_id=LastRow.id
+        rentalotherrooms.skip_signals=True
         rentalotherrooms.save()
 
         rentaldeposit=RentalDeposit()
@@ -438,6 +451,7 @@ def rental_insert(request):
         rentaldeposit.amount=""
         rentaldeposit.user_id=request.user.id
         rentaldeposit.rental_id=LastRow.id
+        rentaldeposit.skip_signals=True
         rentaldeposit.save()
         path1 ="/rentals/overview/"
         path2=str(LastInsertId)
@@ -2812,3 +2826,76 @@ def bookingpal_info(request):
     else:
         response, data = BookingpalNotificationLinks().fetch_all()
         return JsonResponse(data)
+
+@csrf_exempt
+def bookingpal_reservation(request):
+    """
+    Sample payload:
+    {
+        "reservationNotificationRequest": {
+            "reservationId": "107",
+            "productId": "1234816374",
+            "supplierId": "3731837",
+            "channelName": "Airbnb",
+            "confirmationId": "dasdasd",
+            "uniqueKey": "uniqueKey4",
+            "newState": "Cancelled",
+            "customerName": "John Smith",
+            "fromDate": "2016-03-13",
+            "toDate": "2016-03-13",
+            "adult": 2,
+            "child": 0,
+            "address": "asdasd",
+            "city": "asdasd",
+            "zip": "asdasd",
+            "country": "asdasd",
+            "state": "asdasd",
+            "email": "andrewtesttest222@gmail.com",
+            "phone": "4234234",
+            "notes": "customer test message",
+            "creditCardType": "MASTER_CARD",
+            "creditCardNumber": "23123123123213123",
+            "creditCardExpirationMonth": "12",
+            "creditCardExpirationYear": "2023",
+            "creditCardCid": "123",
+            "total": 105.94,
+            "commission": {
+            "channelCommission": 10,
+            "commission": 12
+            },
+            "rate": {
+            "originalRackRate": 400,
+            "netRate": 400,
+            "newPublishedRackRate": 422
+            }
+        },
+        "action": "CREATE"
+    }
+    """
+    if request.method == "POST":
+        data = eval(request.body).get("reservationNotificationRequest")
+        rental_instance = Rental.objects.get(bookingpal_id=data.get("productId"))
+        userprofile_instance = UserProfile.objects.get(bookingpal_id=data.get("supplierId"))
+        channel_instance = Channel.objects.get(channel_title=data.get("channelName"))
+        booking_instance = Bookings.objects.create(
+            bookingpal_id=data.get("reservationId"),
+            rental=rental_instance.id,
+            user_id=userprofile_instance.user.id,
+            channel=channel_instance,
+            first_name=data.get("customerName").split(" ")[0],
+            last_name=" ".join(data.get("customerName").split(" ")[1:]),
+            email=data.get("email"),
+            phone=data.get("phone"),
+            address=data.get("address"),
+            city=data.get("city"),
+            state=data.get("state"),
+            country=data.get("country"),
+            postal_code=int(data.get("zip")),
+            check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"),
+            check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"),
+            status=True if eval(request.body).get("action") == "CREATE" else False,
+            created_at=datetime.datetime.now()
+        )
+        return HttpResponse("")
+    else:
+        return HttpResponse("Only POST method allowed!")
