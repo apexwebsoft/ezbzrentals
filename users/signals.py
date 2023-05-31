@@ -1,7 +1,7 @@
-from rentals.models import BasicRates, Country, ExtraServices, HouseRules, LongStayDiscount, Rental, RentalAmenities, RentalBasic, RentalLocation, RentalRoom, RentalTax, RentalsGallery, SeasonalRates, UserProfile, AccountSetting
+from rentals.models import BasicRates, Country, ExtraServices, HouseRules, LongStayDiscount, Rental, RentalAmenities, RentalBasic, RentalInstruction, RentalLocation, RentalRoom, RentalTax, RentalsGallery, SeasonalRates, UserProfile, AccountSetting
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from users.booking_pal_api import FeeAndTax, LosPricing, ProductImages, ProductManager, PropertyManager, RatesAndAvailability
+from users.booking_pal_api import FeeAndTax, LosPricing, ProductImages, ProductManager, PropertyManager, RatesAndAvailability, declutter_payload
 from datetime import datetime
 
 
@@ -11,26 +11,28 @@ def create_update_property_manager(sender, instance, created, **kwargs):
     if created and sender == UserProfile:
         user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
         country = Country.objects.filter(code=instance.country).first()
+        first_name = instance.first_name if instance.first_name != "NA" else instance.user.first_name
+        last_name = instance.last_name if instance.last_name != "NA" else instance.user.last_name
         payload = {
             "data": {
                 "isCompany": False,
                 "companyDetails": {
-                    "companyName": f"{instance.first_name} {instance.last_name}",
-                    "fullName": f"{instance.first_name} {instance.last_name}",
+                    "companyName": f"{first_name} {last_name}",
+                    "fullName": f"{first_name} {last_name}",
                     "companyAddress": {
-                        "country": instance.country,
-                        "state": instance.state,
-                        "streetAddress": instance.address,
-                        "city": instance.city,
-                        "zip": instance.postal_code
+                        "country": instance.country if instance.country != "NA" else "US",
+                        "state": instance.state if instance.state != "NA" else "Alaska",
+                        "streetAddress": instance.address if instance.address != "NA" else "abc, dummy",
+                        "city": instance.city if instance.city != "NA" else "Nome",
+                        "zip": str(instance.postal_code)
                     },
                     "email": instance.user.email,
                     "phone": {
                         "countryCode": "+"+country.country_code if country else "+1",
-                        "number": instance.phone
+                        "number": instance.phone if instance.phone != "NA" else '9876543210'
                     },
+                    "currency": user_acc_setting.prefered_currency if user_acc_setting else 'USD',
                 },
-                "currency": user_acc_setting.prefered_currency if user_acc_setting else 'USD',
             }
         }
         # Create property manager in BookingPal
@@ -41,35 +43,56 @@ def create_update_property_manager(sender, instance, created, **kwargs):
     else:
         # Update property manager in BookingPal
         if sender==AccountSetting:
-            res, data = PropertyManager().fetch_one(instance.user.bookingpal_id)
+            user_bookingpal_id = UserProfile.objects.get(user__id=instance.user_id).bookingpal_id
+            res, data = PropertyManager().fetch_one(user_bookingpal_id)
         else:
             res, data = PropertyManager().fetch_one(instance.bookingpal_id)
         payload = {"data": data.get("data")[0]}
         if sender == AccountSetting:
-            payload["data"]["currency"] = instance.prefered_currency
+            payload["data"]["companyDetails"]["currency"] = instance.prefered_currency
+            payload["data"]["isCompany"] = True if instance.account_type == "Company" else False
         elif sender == UserProfile:
-            payload["data"]["companyDetails"]["companyName"] = instance.prefered_currency
-            payload["data"]["companyDetails"]["fullName"] = f"{instance.first_name} {instance.last_name}",
-            payload["data"]["companyDetails"]["companyAddress"]["country"] = instance.country
+            first_name = instance.first_name if instance.first_name != "NA" else instance.user.first_name
+            last_name = instance.last_name if instance.last_name != "NA" else instance.user.last_name
+            country = Country.objects.filter(code=instance.country).first()
+            payload["data"]["companyDetails"]["companyName"] = f"{first_name} {last_name}"
+            payload["data"]["companyDetails"]["fullName"] = f"{first_name} {last_name}"
+            payload["data"]["companyDetails"]["companyAddress"]["country"] = instance.country.strip()
             payload["data"]["companyDetails"]["companyAddress"]["state"] = instance.state
-            payload["data"]["companyDetails"]["companyAddress"]["streetAddress"] = instance.streetAddress
+            payload["data"]["companyDetails"]["companyAddress"]["streetAddress"] = instance.address
             payload["data"]["companyDetails"]["companyAddress"]["city"] = instance.city
-            payload["data"]["companyDetails"]["companyAddress"]["zip"] = instance.zip
+            payload["data"]["companyDetails"]["companyAddress"]["zip"] = instance.postal_code
             payload["data"]["companyDetails"]["email"] = instance.user.email
-            payload["data"]["companyDetails"]["phone"]["countryCode"] = "+"+country.country_code if country else "+1"
+            payload["data"]["companyDetails"]["phone"]["countryCode"] = "+"+country.country_code.replace("\t", "") if country else "+1"
             payload["data"]["companyDetails"]["phone"]["number"] = instance.phone
+            payload["data"]["companyDetails"]["website"] = instance.website
+            payload["data"]["companyDetails"]["language"] = instance.language
+            if instance.description:
+                payload["data"]["ownerInfo"] = {
+                    "language": "EN",
+                    "value": instance.description
+                }
+        clutter_list = ['policies', 'payment', 'additionalContacts', 'enableRms', 'neighborhoodOverview']
+        payload = declutter_payload(payload, clutter_list)
+        payload["data"]["companyDetails"].pop('accountId', None)
+        payload["data"]["companyDetails"].pop('transportCompanyAdditionalDetails', None)
         response, data = PropertyManager().update(payload)
 
 @receiver(post_save, sender=Rental)
 @receiver(post_save, sender=RentalRoom)
+@receiver(post_save, sender=RentalBasic)
 @receiver(post_save, sender=RentalLocation)
 @receiver(post_save, sender=BasicRates)
 @receiver(post_save, sender=HouseRules)
 @receiver(post_save, sender=RentalAmenities)
+@receiver(post_save, sender=RentalInstruction)
 def create_update_rental_product(sender, instance, created, **kwargs):
+    if hasattr(instance, 'skip_signals'):
+        if instance.skip_signals:
+            return
     rental_type, space, space_unit, permit_nbr = "PCT102", "1", "SQ_M", "dummy"
     if created and sender == Rental:
-        user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
+        user_acc_setting = AccountSetting.objects.filter(user_id=instance.user_id).first()
         payload = {
             "data": {
                 "name": instance.rental_name,
@@ -131,7 +154,7 @@ def create_update_rental_product(sender, instance, created, **kwargs):
                 instance.bookingpal_img_id = data.get('data')[0].get('id')
                 instance.save()
     else:
-        if sender in [RentalLocation, RentalBasic, RentalRoom, BasicRates, HouseRules, RentalAmenities]:
+        if sender != Rental:
             rental = Rental.objects.get(id=instance.rental_id)
             res, data = ProductManager().fetch_one(rental.bookingpal_id)
         else:
@@ -139,7 +162,8 @@ def create_update_rental_product(sender, instance, created, **kwargs):
 
         payload = {"data": data.get("data")[0]}
         if sender == Rental:
-            user_acc_setting = AccountSetting.objects.filter(user_id=instance.user.id).first()
+            print("Sender >> Rental")
+            user_acc_setting = AccountSetting.objects.filter(user_id=instance.user_id).first()
             payload["data"]["currency"] = user_acc_setting.prefered_currency if user_acc_setting else 'USD'
             payload["data"]["name"] = instance.rental_name
             payload["data"]["notes"] = {
@@ -160,7 +184,10 @@ def create_update_rental_product(sender, instance, created, **kwargs):
                     ]
                 },
             }
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == RentalLocation:
+            print("Sender >> RentalLocation")
             payload["data"]["location"] = {
                     "postalCode": instance.postal,
                     "country": instance.country,
@@ -169,13 +196,19 @@ def create_update_rental_product(sender, instance, created, **kwargs):
                     "street": instance.address,
                     "zipCode9": instance.postal
                 }
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == RentalRoom:
-            payload["data"]["rooms"] = eval(instance.no_of_rooms)[2]
-            payload["data"]["bathrooms"] = eval(instance.no_of_rooms)[1]
-            payload["data"]["livingRoom"] = eval(instance.no_of_rooms)[5]
+            print("Sender >> RentalRoom")
+            payload["data"]["rooms"] = int(instance.no_of_rooms[2])
+            payload["data"]["bathrooms"] = int(instance.no_of_rooms[1])
+            payload["data"]["livingRoom"] = int(instance.no_of_rooms[5])
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == RentalBasic:
+            print("Sender >> RentalBasic")
             rental_type, space, space_unit, permit_nbr = "PCT102", "1", "SQ_M", "dummy"
-            for key, val in RentalBasic.RENTAL_TYPE_DICT:
+            for key, val in RentalBasic.RENTAL_TYPE_DICT.items():
                 if val.lower() == instance.rental_type.lower():
                     rental_type = key
             space = int(instance.floorspace) if instance.floorspace else "1"
@@ -186,28 +219,58 @@ def create_update_rental_product(sender, instance, created, **kwargs):
             permit_nbr = instance.rental_licence if instance.rental_licence else "dummy"
             payload["data"]["propertyType"] = rental_type
             payload["data"]["space"] = space
-            payload["data"]["spaceUnit"]: space_unit
-            payload["data"]["taxNumber"]: permit_nbr
+            payload["data"]["spaceUnit"] = space_unit
+            payload["data"]["taxNumber"] = permit_nbr
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == BasicRates:
-            payload["data"]["persons"] = instance.guest_number if instance.guest_number else 2
+            print("Sender >> BasicRates")
+            payload["data"]["persons"] = int(instance.guest_number) if instance.guest_number else 2
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == HouseRules:
+            print("Sender >> HouseRules")
             payload["data"]["policy"]["childrenAllowed"] = True if instance.for_kid not in ["Not suitable for children", "", None] else False
             payload["data"]["policy"]["smokingAllowed"] = True if instance.smoking_allowed not in ["No smoking", "", None] else False
-            payload["data"]["policy"]["petPolicy"]["allowedPets"] = True if instance.pets not in ["No pets allowed", "", None] else False
+            payload["data"]["policy"]["petPolicy"]["allowedPets"] = "Allowed" if instance.pets not in ["No pets allowed", "", None] else "NotAllowed"
             payload["data"]["policy"]["petPolicy"]["chargePets"] = "Free"
+            payload["data"]["notes"] = {
+                "description": {
+                    "texts": [{
+                        "language": "EN",
+                        "value": "Main description on EN!"
+                    }]
+                },
+                "houseRules": {
+                    "texts": [{
+                        "language": "en",
+                        "value": instance.house_rules
+                    }]
+            }
+            }
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname']
+            payload = declutter_payload(payload, clutter_list)
         elif sender == RentalAmenities:
-            payload["data"]["policy"]["childrenAllowed"] = True if "Children welcome" in eval(instance.aminities) else False
-            payload["data"]["policy"]["smokingAllowed"] = True if "Smoking allowed" in eval(instance.aminities) else False
-            payload["data"]["policy"]["petPolicy"]["allowedPets"] = True if "Pets allowed" in eval(instance.aminities) else False
+            print("Sender >> RentalAmenities")
+            payload["data"]["policy"]["childrenAllowed"] = True if "Children welcome" in instance.amenities else False
+            payload["data"]["policy"]["smokingAllowed"] = True if "Smoking allowed" in instance.amenities else False
+            payload["data"]["policy"]["petPolicy"]["allowedPets"] = "Allowed" if "Pets allowed" in instance.amenities else "NotAllowed"
             payload["data"]["policy"]["petPolicy"]["chargePets"] = "Free"
-            if "Internet wireless" in eval(instance.aminities):
+            if "Internet wireless" in instance.amenities:
                 payload["data"]["policy"]["internetPolicy"] = {
-                    "accessInternet": False,
+                    "accessInternet": True,
                     "kindOfInternet": "WiFi",
                     "availableInternet": "AllAreas",
                     "chargeInternet": "Free"
                 }
-
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
+        elif sender == RentalInstruction:
+            print("Sender >> RentalInstruction")
+            payload["data"]["checkInTime"] = instance.checkin_instruction+":00" if instance.checkin_instruction else "10:00:00"
+            payload["data"]["checkOutTime"] = instance.checkout_instruction+":00" if instance.checkout_instruction else "11:00:00"
+            clutter_list = ['attributesWithQuantity', 'nearbyAmenities', 'bedroomConfiguration', 'policy', 'propertyRating', 'ratingNumber', 'bpValidation', 'enableRms', 'hostLocation', 'usedisplayname', 'notes']
+            payload = declutter_payload(payload, clutter_list)
         # Update property manager in BookingPal
         response, data = ProductManager().update(payload)
         if sender == Rental:

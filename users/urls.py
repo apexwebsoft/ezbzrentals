@@ -79,6 +79,7 @@ urlpatterns = [
     path('rentals/select-channels/<int:id>', views.rental_select_channels),
     path('rentals/channel-update/<int:id>', views.rental_channel_update),
     path('bookingpal-info/',views.bookingpal_info),
+    path('bookingpal-reservation/',views.bookingpal_reservation),
 
 
 # Channels  
