@@ -189,7 +189,7 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json'
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://app.ezbzrentals.com']
+CSRF_TRUSTED_ORIGINS = ['https://app.ezbzrentals.com', 'https://ezb.neolen.xyz']
 
 BOOKINGPAL_API_URL = "https://apidemo.mybookingpal.com"
 BOOKINGPAL_API_KEY = 'IJL9jd7BRYrE7oKkSmUuL3sy2MlCuIsxORwuZ7B7'
