@@ -94,9 +94,9 @@ WSGI_APPLICATION = 'ezbzrental.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DATABASE_NAME', 'ezb'),
-        'USER': os.getenv('DATABASE_USER', 'root'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'Sumit@123'),
+        'NAME': os.getenv('MYSQL_DATABASE_NAME', 'ezb'),
+        'USER': os.getenv('MYSQL_USER', 'root'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'Sumit@123'),
         'HOST': 'localhost',
         'PORT': '3306',
 
