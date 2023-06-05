@@ -302,22 +302,50 @@ def delete_rental_product(sender, instance, using, **kwargs):
 @receiver(post_save, sender=RentalsGallery)
 def create_rental_image(sender, instance, created, **kwargs):
     rental_bookingpal_id = Rental.objects.get(instance.rental_id).bookingpal_id
-    payload = {
-        "data": {
-            "productId": rental_bookingpal_id,
-            "image": {
-                "url": instance.image.url,
-                "tags": [
-                    ]
+    if created:
+        payload = {
+            "data": {
+                "productId": rental_bookingpal_id,
+                "image": {
+                    "url": instance.image.url,
+                    "tags": []
+                }
             }
         }
-    }
-    if created:
-        # Create property manager in BookingPal
+        # Create rental image in BookingPal
         response, data = ProductImages().create(payload)
         if response:
             instance.bookingpal_id = data.get('data')[0].get('id')
             instance.save()
+    else:
+        response, data = ProductImages().fetch_all(rental_bookingpal_id)
+        payload = {"data": data.get("data")[0]}
+        img_found=False
+        for img in payload.get("data").get("images"):
+            if img.get("url") == instance.old_image.url:
+                img["url"] = instance.image.url
+                img_found=True
+        if not img_found:
+            payload = {
+                "data": {
+                    "productId": rental_bookingpal_id,
+                    "image": {
+                        "url": instance.image.url,
+                        "tags": []
+                    }
+                }
+            }
+            # Create rental image in BookingPal
+            response, data = ProductImages().create(payload)
+            if response:
+                instance.bookingpal_id = data.get('data')[0].get('id')
+                instance.save()
+        else:
+            # Update rental image in BookingPal
+            response, data = ProductImages().update(payload)
+            if response:
+                instance.bookingpal_id = data.get('data')[0].get('id')
+                instance.save()
 
 @receiver(pre_delete, sender=RentalsGallery)
 def delete_rental_product_image(sender, instance, using, **kwargs):
