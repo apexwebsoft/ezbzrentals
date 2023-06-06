@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Feedback </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        
+        <link rel="shortcut icon" href="/static/users/images/favicon.png">
+
+<link href="/static/users/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/icons.min.css" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/custom.css" rel="stylesheet" type="text/css" />
+<link href="/static/users/libs/bootstrap-rating/bootstrap-rating.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+                                
+
+    </head>
+
+    <body data-layout="horizontal">
+        <div id="layout-wrapper">
+        {% include 'users/base/header.html'%}
+       
+		<div class="main-content">
+<div class="page-content">
+    <div class="container-fluid">
+<div class="row">
+    <div class="col-xl-2"></div>
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title"><b>Feedback  </b></h2>
+               
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">{{message}}   
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+            </div>
+                {% endfor %}
+                {%endif%}
+                <h5>We’d love to hear what you think about EZBZ.Rentals so that we can use your feedback to improve our service.</h5>
+                <br>
+                <form method="POST" enctype="multipart/form-data" class="post-form" action="/feedback"> {% csrf_token %} 
+                <div class="form-group">
+                    <label class="form-label fw6" for="rating">How likely are you to recommend EZBZ.Rentals?</label>
+                    {% comment %} <div class="col-lg-12">
+                    <div class="mb-3">
+                        <input type="radio" name="rating" value="1" id="rating-1"  >
+                        <label for="rating-1"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="2" id="rating-2" >
+                        <label for="rating-2"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="3" id="rating-3">
+                        <label for="rating-3"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="4" id="rating-4" >
+                        <label for="rating-4"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="5" id="rating-5" >
+                        <label for="rating-5"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="6" id="rating-6" >
+                        <label for="rating-6"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="7" id="rating-7" >
+                        <label for="rating-7"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="8" id="rating-8">
+                        <label for="rating-8"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="9" id="rating-9" >
+                        <label for="rating-9"><i class="fa fa-star"></i></label>
+                        <input type="radio" name="rating" value="10" id="rating-10" >
+                        <label for="rating-10"><i class="fa fa-star"></i></label>
+                    </div>
+                </div>
+            </div> {% endcomment %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="validationCustom01" class="form-label fw6">Ratings</label>
+                        <select name="rating" class="form-select" required>
+                            <option>--Select--</option>
+                            <option value="1 star">1 Star</option>
+                            <option value="2 star" >2 Star </option>
+                            <option value="3 star">3 Star </option>
+                            <option value="4 star">4 Star </option>
+                            <option value="5 star">5 Star </option>
+                            <option value="6 star">6 Star </option>
+                            <option value="7 star">7 Star </option>
+                            <option value="8 star">8 Star </option>
+                            <option value="9 star">9 Star </option>
+                            <option value="10 star">10 Star </option>
+
+                          </select>
+                    </div>
+                </div>
+                
+                <h4>Have other feedback? Let us know by selecting a category.</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="validationCustom01" class="form-label fw6">Category</label>
+                            <select name="feedback_category" class="form-select" required>
+                                <option>--Select--</option>
+                                <option value="suggestions">Suggestions</option>
+                                <option value="report bug" >Report bug</option>
+                                <option value="compliment">Compliment </option>
+                              </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="mb-3">
+                                <label for="validationCustom01" class="form-label fw6 text-muted">Description (max 1000 characters)</label>
+                                <textarea class="form-control" id="feedback" name="description"  rows="10"></textarea>
+                                <p id="char-count">500 characters remaining</p>
+                                <div class="valid-feedback">
+                                    Looks good!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                    </div>
+               
+                        
+                        </div>
+                      </div>
+                      
+                </div>
+            </div>
+            
+            
+        </form>
+        </div>
+    </div>
+        <!-- end card -->
+    </div> <!-- end col -->
+    {% include 'super/base/footer.html'%}
+</div> 
+
+<script src="/static/users/libs/jquery/jquery.min.js"></script>
+<script src="/static/users/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/users/libs/bootstrap-rating/bootstrap-rating.min.js"></script>
+<script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
+<script src="/static/users/libs/simplebar/simplebar.min.js"></script>
+<script src="/static/users/libs/node-waves/waves.min.js"></script>
+<script src="/static/users/libs/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script src="/static/users/js/pages/form-element.init.js"></script>
+<script src="/static/users/js/app.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/35.4.0/classic/ckeditor.js"></script>
+<script>
+    const feedbackInput = document.getElementById("feedback");
+    const charCount = document.getElementById("char-count");
+
+    feedbackInput.addEventListener("input", function() {
+        const remainingChars = 500 - feedbackInput.value.length;
+        charCount.innerText = `${remainingChars} characters remaining`;
+
+        if (remainingChars < 0) {
+            charCount.classList.add("text-danger");
+        } else {
+            charCount.classList.remove("text-danger");
+        }
+    });
+</script>
+<script>
+  ClassicEditor
+          .create( document.querySelector( '#elm1' ) );
+</script>
+<script>
+    $(".alert-success").fadeTo(3000, 500).slideUp(500, function(){
+        $(".alert-success").slideUp(500);
+    });
+</script>
+
+    
+</body>
+
+</html>      

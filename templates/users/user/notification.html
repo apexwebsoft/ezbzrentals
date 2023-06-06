@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Notification </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="" name="description" />
+        <meta content="" name="author" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        
+        <link rel="shortcut icon" href="/static/users/images/favicon.png">
+
+<link href="/static/users/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/icons.min.css" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+<link href="/static/users/css/custom.css" rel="stylesheet" type="text/css" />
+
+                                
+
+    </head>
+
+    <body data-layout="horizontal">
+        <div id="layout-wrapper">
+        {% include 'users/base/header.html'%}
+       
+		<div class="main-content">
+<div class="page-content">
+    <div class="container-fluid">
+<div class="row">
+    <div class="col-xl-2"></div>
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><b>Notification Preferences </b></h4>
+                <p>You can control the notifications you receive from EZBZ.RENTALS. Select which notifications you would like to receive and how you would like to receive them. Please note that certain important notifications cannot be turned off.</p>
+
+                   <p> Email notifications will be sent to account email <b>{{request.user.email}}. </b>Add your phone number to receive SMS notifications.</p>
+                    
+                    <p>If you add more accounts to your organisation, we will send email notifications to each accounts email address.</p>
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">{{message}}   
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+            </div>
+                {% endfor %}
+                {%endif%}
+                <br><br><br>
+                <form method="POST" enctype="multipart/form-data" class="post-form" action="/notification"> {% csrf_token %}   
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates"><b>News and updates</b></label></div>
+                                <div class="col-lg-6">
+                                    <label class="form-notification-label fw6" for="blog-updates"><b>Email</b></label></div>
+                              </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates">EZBZ.RENTALS newsletter</label></div>
+                                <div class="col-lg-6">
+                                <input type="checkbox" name="newsletter" id="news-updates" {% if notification.newsletter == 1 %} checked {% endif %}>
+                                <input type="hidden" name="news_value" value="0"></div>
+                              </div>
+                              <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates">EZBZ.RENTALS Blog Updates</label></div>
+                                <div class="col-lg-6">
+                                <input type="checkbox" name="blog_updates" id="blog-updates" {% if notification.blog_updates == 1 %} checked {% endif %}>
+                                <input type="hidden" name="blog_value" value="0"></div>
+                              </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Features and new channel announcements</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="announcement-updates" name="new_channel_announcement" {% if notification.new_channel_announcement == 1 %} checked {% endif %}>
+                            <input type="hidden" name="announcement_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Special offers, promotions and surveys</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="survey-updates" name="surveys" {% if notification.surveys == 1 %} checked {% endif %}>
+                            <input type="hidden" name="survey_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Booking notifications</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="booking-updates" name="booking_notification" {% if notification.booking_notification == 1 %} checked {% endif %}>
+                            <input type="hidden" name="booking_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Payout notifications</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="payout-notifications" name="payout_notification" {% if notification.payout_notification == 1 %} checked {% endif %}>
+                            <input type="hidden" name="payout_notification_value" value="0"></div>
+
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="guest-notifications">Guest notifications</label>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="guest-notifications" name="guest_notification" {% if notification.guest_notification == 1 %} checked {% endif %}>
+                              <input type="hidden" name="guest_notification_value" value="0">
+                            </div>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="guest-reviews">Guest reviews</label>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="guest-reviews" name="guest_review" {% if notification.guest_review == 1 %} checked {% endif %}>
+                              <input type="hidden" name="guest_review_value" value="0">
+                            </div>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="calendar-updates">Calendar updates</label>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="calendar-updates" name="calendar_update" {% if notification.calendar_update == 1 %} checked {% endif %}>
+                              <input type="hidden" name="calendar_update_value" value="0">
+                            </div>
+                          </div>
+                          
+                        <div>
+                            <button class="btn btn-primary" type="submit">Save</button>
+                        </div>
+                    </form>
+                        
+                        </div>
+                      </div>
+                      
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- end card -->
+    </div> <!-- end col -->
+    {% include 'super/base/footer.html'%}
+</div> 
+
+<script src="/static/users/libs/jquery/jquery.min.js"></script>
+<script src="/static/users/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
+<script src="/static/users/libs/simplebar/simplebar.min.js"></script>
+<script src="/static/users/libs/node-waves/waves.min.js"></script>
+<script src="/static/users/libs/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script src="/static/users/js/pages/form-element.init.js"></script>
+<script src="/static/users/js/app.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/35.4.0/classic/ckeditor.js"></script>
+<script>
+  ClassicEditor
+          .create( document.querySelector( '#elm1' ) );
+</script>
+<script>
+    $(".alert-success").fadeTo(3000, 500).slideUp(500, function(){
+        $(".alert-success").slideUp(500);
+    });
+</script>
+<script>
+    $(document).ready(function() {
+      $('input[type="checkbox"]').change(function() {
+        if($(this).is(':checked')) {
+          $(this).next('input[type="hidden"]').val('1');
+        } else {
+          $(this).next('input[type="hidden"]').val('0');
+        }
+      });
+    });
+    </script>
+    
+</body>
+
+</html>      
