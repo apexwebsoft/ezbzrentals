@@ -2877,25 +2877,55 @@ def bookingpal_reservation(request):
         rental_instance = Rental.objects.get(bookingpal_id=data.get("productId"))
         userprofile_instance = UserProfile.objects.get(bookingpal_id=data.get("supplierId"))
         channel_instance = Channel.objects.get(channel_title=data.get("channelName"))
-        booking_instance = Bookings.objects.create(
-            bookingpal_id=data.get("reservationId"),
-            rental=rental_instance.id,
-            user_id=userprofile_instance.user.id,
-            channel=channel_instance,
-            first_name=data.get("customerName").split(" ")[0],
-            last_name=" ".join(data.get("customerName").split(" ")[1:]),
-            email=data.get("email"),
-            phone=data.get("phone"),
-            address=data.get("address"),
-            city=data.get("city"),
-            state=data.get("state"),
-            country=data.get("country"),
-            postal_code=int(data.get("zip")),
-            check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"),
-            check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"),
-            status=True if eval(request.body).get("action") == "CREATE" else False,
-            created_at=datetime.datetime.now()
-        )
+
+        # verify dates blocked/rates
+
+        if eval(request.body).get("action") == "CREATE":
+            from django.db.models import Q
+            check_in_in_range = Q(check_in__lte=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"), check_out__gte=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"))
+            check_out_in_range = Q(check_in__lte=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"), check_out__gte=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"))
+            
+            existing_bookings = Bookings.objects.filter(check_in_in_range | check_out_in_range,
+                                                        rental=rental_instance.id,
+                                                        status=True)
+            if existing_bookings.exists():
+                return HttpResponse("Already booked for the provided dates")
+
+            booking_instance = Bookings.objects.create(
+                bookingpal_id=data.get("reservationId"),
+                rental=rental_instance.id,
+                user_id=userprofile_instance.user.id,
+                channel=channel_instance,
+                first_name=data.get("customerName").split(" ")[0],
+                last_name=" ".join(data.get("customerName").split(" ")[1:]),
+                email=data.get("email"),
+                phone=data.get("phone"),
+                address=data.get("address"),
+                city=data.get("city"),
+                state=data.get("state"),
+                country=data.get("country"),
+                postal_code=int(data.get("zip")),
+                check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"),
+                check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"),
+                status=True if eval(request.body).get("action") in ["CREATE","UPDATE"] else False,
+                created_at=datetime.datetime.now()
+            )
+        else:
+            booking_instance = Bookings.objects.get(bookingpal_id=data.get("reservationId"), channel=channel_instance)
+            booking_instance.first_name=data.get("customerName").split(" ")[0]
+            booking_instance.last_name=" ".join(data.get("customerName").split(" ")[1:])
+            booking_instance.email=data.get("email")
+            booking_instance.phone=data.get("phone")
+            booking_instance.address=data.get("address")
+            booking_instance.city=data.get("city")
+            booking_instance.state=data.get("state")
+            booking_instance.country=data.get("country")
+            booking_instance.postal_code=int(data.get("zip"))
+            booking_instance.check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d")
+            booking_instance.check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d")
+            booking_instance.status=True if eval(request.body).get("action") in ["CREATE","UPDATE"] else False
+            booking_instance.status
+            booking_instance.save()
         return HttpResponse("")
     else:
         return HttpResponse("Only POST method allowed!")

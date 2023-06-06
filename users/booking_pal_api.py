@@ -350,6 +350,23 @@ class ProductImages:
             print(response)
             print(response.content)
     
+    def update(self, payload):
+        url = f"{API_BASE_URL}/image?jwt={self.token}"
+        headers = self.headers
+        headers['Content-Type'] = 'application/json'
+        response = requests.request("PUT", url, headers=headers, json=payload)
+        if response.status_code == 200:
+            if response.json().get('is_error'):
+                print(response.json().get('errorMessage'))
+                return False, {}
+            else:
+                print("\n\n" + self.__class__.__name__ + " > " + inspect.stack()[0][3], response.json())
+                return True, response.json()
+        else:
+            print("Some error occurred!!")
+            print(response)
+            print(response.content)
+    
     def delete(self, payload):
         """
         Sample response: {'message': 'Product with id 1237790312 was deleted', 'errorMessage': [], 'code': '', 'is_error': False}
