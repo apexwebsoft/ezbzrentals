@@ -13,8 +13,7 @@ class UserProfile(models.Model):
     User = get_user_model()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="UserProfile",default=1)
     first_name=models.CharField(max_length=100) 
-    last_name=models.CharField(max_length=100) 
-    profile_photo=models.FileField(upload_to="user_profile_photo",null=True ,default=None)
+    last_name=models.CharField(max_length=100)
     phone=models.CharField(max_length=15)  
     address=models.TextField(null=True, blank=True)
     city=models.CharField(max_length=50)
@@ -76,14 +75,35 @@ class AmenitiesType(models.Model):
 class Amenities(models.Model):
     amenities_type=models.ForeignKey(AmenitiesType, on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
+    code=models.CharField(max_length=100)
     status = models.BooleanField(default=True)
   
     class Meta:  
         db_table = "amenities"
 
     def __str__(self):
-        return self.title  
+        return self.title
+
+class NearByAmenities(models.Model):
+    title=models.CharField(max_length=100)
+    code=models.CharField(max_length=100)
+    distance=models.CharField(max_length=100,default=0)
+    status = models.BooleanField(default=True)
+    class Meta:
+        db_table = "nearby_amenities"
+    def __str__(self):
+        return self.title
        
+class RentalNearByAmenities(models.Model):
+    nearbyamenities=models.CharField(max_length=1000)
+    distance=models.CharField(max_length=100,default=0)
+    user_id = models.IntegerField()
+    rental_id=models.IntegerField()
+    status = models.BooleanField(default=True)
+    class Meta:
+        db_table = "rental_nearby_amenities"
+    def __str__(self):
+        return self.nearbyamenities
 
 class Activity(models.Model):  
     name=models.CharField(max_length=100)
@@ -270,13 +290,19 @@ class Rental(models.Model):
         return self.rental_name      
 
 class RentalBasic(models.Model):
-    RENTAL_TYPE_DICT = {"PCT101":"Townhome", "PCT102":"Single Room", "PCT103":"Double Room", "PCT104":"Twin", "PCT105":"Twin/Double", "PCT106":"Triple Room", "PCT107":"Quadruple", "PCT108":"Family", "PCT109":"Suite", "PCT110":"Studio", "PCT111":"Bungalow", "PCT112":"Private room", "PCT113":"Shared room", "PCT114":"Cottage", "PCT115":"Apart Hotel", "PCT116":"Narrow boat", "PCT117":"Riad", "PCT118":"Shepherd Hut", "PCT119":"Tipi", "PCT12":"Cruise", "PCT120":"Tower", "PCT121":"Tree house", "PCT122":"Trullo", "PCT123":"Watermill", "PCT124":"Windmill", "PCT125":"Yacht", "PCT126":"Yurt", "PCT127":"Log Cabin", "PCT128":"Penthouse", "PCT14":"Ferry", "PCT15":"Guest farm", "PCT16":"Guest house limited service", "PCT18":"Holiday resort", "PCT19":"Hostel", "PCT20":"Hotel", "PCT21":"Inn", "PCT22":"Lodge", "PCT23":"Meeting resort", "PCT25":"Mobile-home", "PCT26":"Monastery", "PCT27":"Motel", "PCT28":"Ranch", "PCT29":"Residential apartment", "PCT3":"Apartment", "PCT30":"Resort", "PCT31":"Sailing ship", "PCT32":"Self catering accommodation", "PCT33":"Tent", "PCT34":"Vacation home", "PCT35":"Villa", "PCT36":"Wildlife reserve", "PCT37":"Castle", "PCT4":"Bed and breakfast", "PCT40":"Pension", "PCT41":"Ski Chalet", "PCT44":"Boatel", "PCT45":"Boutique", "PCT46":"Efficiency/studio", "PCT5":"Cabin or bungalow", "PCT50":"Recreational vehicle park", "PCT51":"Charm hotel", "PCT52":"Manor", "PCT6":"Campground", "PCT7":"Chalet", "PCT8":"Condominium"}
     rental_type=models.CharField(max_length=100)
     rental_basis=models.CharField(max_length=100) 
     floorspace=models.CharField(max_length=100) 
     floorspace_units=models.CharField(max_length=100) 
     grounds=models.CharField(max_length=100) 
-    grounds_units=models.CharField(max_length=100) 
+    rooms=models.CharField(max_length=100)
+    bathrooms=models.CharField(max_length=100)
+    toilets=models.CharField(max_length=100)
+    total_beds=models.CharField(max_length=100)
+    persons=models.CharField(max_length=100)
+    childs=models.CharField(max_length=100)
+    living_room=models.CharField(max_length=100)
+    grounds_units=models.CharField(max_length=100)
     floors_building=models.CharField(max_length=100) 
     entrance=models.CharField(max_length=100) 
     rental_licence=models.CharField(max_length=100)
@@ -298,7 +324,9 @@ class RentalLocation(models.Model):
     city=models.CharField(max_length=100) 
     state=models.CharField(max_length=100) 
     postal=models.CharField(max_length=100)
-    user_id = models.IntegerField() 
+    latitude=models.CharField(max_length=100)
+    longitude=models.CharField(max_length=100)
+    user_id = models.IntegerField()
     rental_id=models.IntegerField()
     status = models.BooleanField(default=True)
     class Meta:  
@@ -402,8 +430,8 @@ class Attributes(models.Model):
      
 
 class Bookings(models.Model):
-    rental=models.CharField(max_length=100)
-    channel=models.ForeignKey(Channel, on_delete=models.CASCADE)
+    rental=models.ForeignKey(Rental, on_delete=models.CASCADE)
+    channel=models.CharField(max_length=100,null=True)
     booking_type=models.CharField(max_length=100)
     first_name=models.CharField(max_length=100) 
     last_name=models.CharField(max_length=100) 
@@ -683,6 +711,7 @@ class HouseRules(models.Model):
     parties_allowed= models.CharField(max_length=100)
     smoking_allowed= models.CharField(max_length=100)
     pets= models.CharField(max_length=100)
+    pets_charge= models.CharField(max_length=100,null=True)
     house_rules= models.TextField(max_length=3000)
     status = models.BooleanField(default=True)
     user_id = models.IntegerField()

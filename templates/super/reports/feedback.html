@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title> Users</title>
+        <title> Feedback</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta content="" name="description" />
         <meta content="" name="author" />
@@ -31,6 +31,7 @@
                 {% include 'super/base/top_nav.html' %}
         </div>
 
+
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -38,18 +39,13 @@
                 <div class="page-title-box">
                     <div class="row">
                         <div class="col">
-                            <h4 class="page-title">Users</h4>
+                            <h4 class="page-title">Feedback</h4>
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/super/dashboard">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Users</li>
+                                <li class="breadcrumb-item active">Feedback</li>
                             </ol>
                         </div>
-                        <div class="col-auto align-self-center">
-                            <a href="/super/user-add" class="btn btn-primary">                                           
-                                <i data-feather="plus" class="align-self-center icon-xs ml-1"></i>&nbsp; Add New
-                            </a>
-                            
-                        </div>
+                        
                     </div>
                     
                 </div>
@@ -57,61 +53,57 @@
         </div>
         {% if messages %}
         {% for message in messages %}
-		<div class="alert alert-success border-0" role="alert">{{message}}</div>
-		{% endfor %}
-		{%endif%}
+        <div class="alert alert-success border-0" role="alert">{{message}}   
+        </div>
+        {% endfor %}
+        {%endif%}
  
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-               
                 <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead>
-                        <tr>  
-                            <th>ID</th>  
-                            <th>First Name</th> 
-                            <th>Last Name</th> 
-                            <th>Username</th>  
-                            <th>Email</th>                                 
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>  
-                        </tr>  
-                    </thead>  
-    <tbody>  
-{% for user in users %}  
     <tr>  
-        <td>{{ user.id }}</td>  
-        <td>{{ user.first_name }}</td>
-        <td>{{ user.last_name }}</td>    
-        <td>{{ user.username}}</td>  
-        <td>{{ user.email }}</td>    
-        <td>{{user.date_joined}}</td> 
-        <td class="level-right">
-            {% if user.is_active == 1 %}
-            <a class="badge badge-soft-success" >Active</a>
-            {% else %}
-            <a class="badge badge-soft-danger">InActive</a>
-            {% endif %}
-        </td>
-        <td class="text-left">                                                       
-            <a href="/super/user-edit/{{ user.id }}" ><i class="las la-pen text-info font-18"></i></a>
-            <a href="/super/user-delete/{{ user.id }}" onclick="return DelItem();" ><i class="las la-trash-alt text-danger font-18"></i></a>
-        </td>
+        <th>SN</th>
+        <th>Rating</th>  
+        <th>User</th>  
+        <th>Category</th> 
+        <th>Message</th>
+        <th>Action</th>
+         
+        
+        
+        
     </tr>  
-{% endfor %}  
+    </thead>  
+    <tbody>  
+ {% for d in feedback %}  
+    <tr>  
+        <td>{{forloop.counter}}</td>
+        <td>{{d.rating }}</td>  
+        <td>{{d.user_id }}</td>
+        <td>{{d.feedback_category}} </td>
+        <td>{{d.description}} </td>
+        
+        
+        <td class="text-left">                                                       
+          
+            <a href="/super/feedback-delete/{{ d.id }}" onclick="return DelItem();"  ><i class="las la-trash-alt text-danger font-18"></i></a>
+        </td>
+       
+        
+    </tr>  
+ {% endfor %}  
     </tbody>  
-</table>
+</table> 
 </div>
 </div>
 </div>
 </div>
-
-</div>
-{% include 'super/base/footer.html'%}
 </div> 
-
+{% include 'super/base/footer.html'%}
+</div>
 <script src="/static/super/js/jquery.min.js"></script>
 <script src="/static/super/js/bootstrap.bundle.min.js"></script>
 <script src="/static/super/js/metismenu.min.js"></script>
@@ -153,4 +145,6 @@
 </script>
 </body>
 
-</html>
+</html> 
+ 
+

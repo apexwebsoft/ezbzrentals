@@ -49,16 +49,16 @@
                     <div class="card-body">
                         <div class="row mb-3">  
                             <label for="example-text-input" class="col-form-label customer_lable">CUSTOMER</label> 
-                            <div class="col-sm-12">Jeff Jack</div>
+                            <div class="col-sm-12">{{bookings.first_name}}</div>
                           </div>
                           <div class="row mb-3">  
                             <label for="example-text-input" class="col-form-label customer_lable">PHONE</label>  
-                            <div class="col-sm-12">123456789</div>
+                            <div class="col-sm-12">{{bookings.phone}}</div>
                           </div>  
                             <div class="row mb-3">  
                             <label for="example-text-input" class="col-form-label customer_lable">EMAIL</label>  
                             <div class="col-sm-12">  
-                             <a href="mailto:info@ezbzrentals.com">info@ezbzrentals.com</a>
+                             <a href="mailto:info@ezbzrentals.com">{{bookings.email}}</a>
                             </div>  
                           </div>  
                        
@@ -78,11 +78,11 @@
                             <h2 class="upper-letter">Room</h2>
                             <div class="booking_field">
                                 <div class="booking_lable">CHECK IN</div>
-                                <div class="booking_date">Sat 04-08-2023</div>
+                                <div class="booking_date">{{bookings.check_in}}</div>
                             </div>    
                             <div class="booking_field">
                                 <div class="booking_lable">CHECK OUT</div>
-                                <div class="booking_date">Sat 04-08-2023</div>
+                                <div class="booking_date">{{bookings.check_out}}</div>
                             </div> 
                             <div class="booking_field">
                                 <div class="booking_lable">NIGHTS</div>

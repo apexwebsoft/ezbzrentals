@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from rentals.forms import CreateUserForm, InvoiceForm, InvoiceItemFormset
-from rentals.models import  Activity, BasicRates, CustomServices, EarlyBirdDiscount, ExtraServices, HouseRules, LongStayDiscount, OtherRooms, Amenities, AmenitiesType, Attributes, Bed, Bookings, Category, Channel, CompanyProfile, Country, Discount, DiscountType,Currency, Invoice, InvoiceItem, Partner, Policy, PropertyRole, Rate, Ratetype, Rental, RentalAmenities, RentalBasic, RentalCleaning, RentalDeposit, RentalInstruction, RentalLocation, RentalOtherRooms, RentalPolicy, RentalTax, RentalsGallery, Rentaltype, Room, Roomtype, SeasonalRates, Services, Subscription, Tax, Taxtype, UserProfile
+from rentals.models import  Activity, BasicRates, CustomServices, EarlyBirdDiscount, ExtraServices, Feedback, HouseRules, LongStayDiscount, NearByAmenities, OtherRooms, Amenities, AmenitiesType, Attributes, Bed, Bookings, Category, Channel, CompanyProfile, Country, Discount, DiscountType,Currency, Invoice, InvoiceItem, Partner, Policy, PropertyRole, Rate, Ratetype, Rental, RentalAmenities, RentalBasic, RentalCleaning, RentalDeposit, RentalInstruction, RentalLocation, RentalOtherRooms, RentalPolicy, RentalTax, RentalsGallery, Rentaltype, Room, Roomtype, SeasonalRates, Services, Subscription, Tax, Taxtype, UserProfile
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -361,7 +361,8 @@ def amenities_insert(request):
     if request.method == "POST":
         amenities=Amenities()
         amenities.amenities_type_id=request.POST.get('amenities_type')
-        amenities.title=request.POST.get('title')  
+        amenities.title=request.POST.get('title')
+        amenities.code=request.POST.get('code')
         amenities.status=request.POST.get('status')
         amenities.save()
         messages.success(request, ' Row added Successfully.')
@@ -396,7 +397,8 @@ def amenities_update(request, id):
     amenities = Amenities.objects.get(id=id) 
     if request.method == "POST":
         amenities.amenities_type_id=request.POST.get('amenities_type')
-        amenities.title=request.POST.get('title')  
+        amenities.title=request.POST.get('title')
+        amenities.code=request.POST.get('code')
         amenities.status=request.POST.get('status')
         amenities.save()
         messages.success(request, ' Row updated Successfully.')
@@ -416,56 +418,52 @@ def amenities_destroy(request, id):
 # Activity code start
 
 @login_required(login_url='/super/')
-def activity(request):  
-    activity = Activity.objects.all()  
-    return render(request,"super/amenities/activity.html",{'activity':activity})  
+def nearby_amenities(request):
+    nearby = NearByAmenities.objects.all()
+    return render(request,"super/amenities/nearby-amenities.html",{'nearby':nearby})
 
 @login_required(login_url='/super/')
-def activity_add(request):
-    User = get_user_model().objects.all()
-    return render(request, 'super/amenities/activity-add.html',{'users':User})
+def nearby_amenities_add(request):
+    return render(request, 'super/amenities/nearby-amenities-add.html')
 
 @login_required(login_url='/super/')
-def activity_insert(request):
+def nearby_amenities_insert(request):
     if request.method == "POST":
-        activity=Activity()
-        activity.name=request.POST.get('name')
-        activity.distance=request.POST.get('distance')
-        activity.description=request.POST.get('description')
-        activity.user_id=request.POST.get('user_id')
-        activity.status=request.POST.get('status')
-        activity.save()
+        nearby=NearByAmenities()
+        nearby.title=request.POST.get('title')
+        nearby.code=request.POST.get('code')
+        nearby.status=request.POST.get('status')
+        nearby.save()
         messages.success(request, ' Row added Successfully.')
-    return redirect('/super/activity')    
+    return redirect('/super/nearby-amenities')
 
 @login_required(login_url='/super/')
-def activity_edit(request,id):  
-    activity = Activity.objects.get(id=id)  
-    return render(request,'super/amenities/activity-edit.html',{'activity':activity})  
+def nearby_amenities_edit(request,id):
+    nearby = NearByAmenities.objects.get(id=id)
+    return render(request,'super/amenities/nearby-amenities-edit.html',{'nearby':nearby})
 
 @login_required(login_url='/super/')
-def activity_update(request,id):
-    activity = Activity.objects.get(id=id)
+def nearby_amenities_update(request,id):
+    nearby = NearByAmenities.objects.get(id=id)
     if request.method == "POST":
-        activity.name=request.POST.get('name')
-        activity.distance=request.POST.get('distance')
-        activity.description=request.POST.get('description')
-        activity.status=request.POST.get('status')
-        activity.save()
+        nearby.title=request.POST.get('title')
+        nearby.code=request.POST.get('code')
+        nearby.status=request.POST.get('status')
+        nearby.save()
         messages.success(request, ' Row updated Successfully.')
-        return redirect('/super/activity')   
+        return redirect('/super/nearby-amenities')
 
       
     
-    return render(request, 'super/amenities/activity-edit.html',{'activity':activity})  
+    return render(request, 'super/amenities/nearby-amenities-edit.html',{'nearby':nearby})
 
 @login_required(login_url='/super/')
-def activity_destroy(request, id):  
-    activity = Activity.objects.get(id=id)  
-    activity.delete() 
+def nearby_amenities_destroy(request, id):
+    nearby = NearByAmenities.objects.get(id=id)
+    nearby.delete()
     messages.success(request, ' Row deleted Successfully.')
 
-    return redirect("/super/activity")   
+    return redirect("/super/nearby-amenities")
 
 
 # Activity code end
@@ -2516,3 +2514,13 @@ def services_destroy(request,id):
     return redirect('/super/services')
 
 # Services Code end
+
+
+def feedback(request):
+    feedback=Feedback.objects.all()
+    return render(request,'super/reports/feedback.html',{'feedback':feedback})
+
+def feedback_destroy(request,id):
+    feedback=Feedback.objects.get(id=id)
+    feedback.delete()
+    return redirect('/super/feedback')

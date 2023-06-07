@@ -47,7 +47,7 @@
                 <div class="row mb-3">
                     <div class="col-lg-6">
                     <label class="form-label fw6">Rental Type<span class="strict">*</span></label>
-                    <select name="rental_type" class="form-control select2" required>
+                    <select name="rental_type" class="form-select" required>
                       <option>--Select--</option>
                       {% for rentaltype in rentaltype %}
                       <option value="{{rentaltype.id}}" {% if rentaltype.rental_type == rentalbasic.rental_type_id %} selected {% endif %}>{{rentaltype.room_type_name}} </option>                      
@@ -118,10 +118,69 @@
                     <input id="rental_licence" placeholder="Enter Property Licence Number" name="rental_licence" type="text" class="form-control" value="{{rentalbasic.rental_licence}}">
                   </div>
                 </div>
+
+                <div class="row mb-3">
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Rooms  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of rooms" name="rooms" type="text" class="form-control" value="{{rentalbasic.rooms}}">
+                  </div>
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Bathrooms  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of bathrooms" name="bathrooms" type="text" class="form-control" value="{{rentalbasic.bathrooms}}">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Toilets  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of toilets" name="toilets" type="text" class="form-control" value="{{rentalbasic.toilets}}">
+                  </div>
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Total Beds  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of total beds" name="total_beds" type="text" class="form-control" value="{{rentalbasic.total_beds}}">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Persons  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of person" name="persons" type="text" class="form-control" value="{{rentalbasic.persons}}">
+                  </div>
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Childs   <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of total children" name="childs" type="text" class="form-control" value="{{rentalbasic.childs}}">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-lg-6" id="tooltip-container">
+                    <label class="form-label fw6" for="productname">Living Room  <button type="button" class="btntip" data-bs-container="#tooltip-container"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="If your local authority ask you to have a Property Licence Number, enter it here.">
+                      ?
+                  </button></label>
+                    <input id="rental_licence" placeholder="Enter no of living room" name="living_room" type="text" class="form-control" value="{{rentalbasic.living_room}}">
+                  </div>
+                </div>
+                
             
                 <div class="mb-3">
-                 <input type="submit" class="btn btn-primary" value="Save">
-                  
+                 <input type="submit" class="btn btn-primary" value="Save"> 
                 </div>
               </form>
             </div>
@@ -129,13 +188,12 @@
         </div>
       </div>
     </div>
-    </div>    
-    </div>
+  </div>    
+</div>
 </div>
 {% include 'users/base/footer.html'%} 
 </div>
 </div>
-
 <script src="/static/users/libs/jquery/jquery.min.js"></script>
 <script src="/static/users/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
@@ -143,7 +201,6 @@
 <script src="/static/users/libs/node-waves/waves.min.js"></script>
 <script src="/static/users/libs/jquery-sparkline/jquery.sparkline.min.js"></script>
 <script src="/static/users/libs/select2/js/select2.min.js"></script>
-
 <script src="/static/users/js/app.js"></script>
 
 <script>
@@ -157,9 +214,6 @@
           reader.readAsDataURL(file);
         }
     }
-
-
-    
 </script>
 
 <script>

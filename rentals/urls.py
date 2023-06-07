@@ -12,7 +12,8 @@ urlpatterns = [
 
 # authentication
     #path('super/register', views.registerPage, name="register"),
-	path('super/', views.auth_view, name="login"),   
+	path('super/', views.auth_view, name="login"),
+    path('super/login', views.auth_view, name="login"),
 	path('super/logout', views.logoutUser, name="logout"),  
 
 #user management       
@@ -28,7 +29,8 @@ urlpatterns = [
     path('super/user-profile-delete/<int:id>',views.user_profile_delete),
     path('super/user-indivisual-profile/<int:id>',views.user_indivisual_profile),
     path('super/user-indivisual-profile-update/<int:id>',views.user_indivisual_profile_update),
-# channels  
+
+# channels
     path('super/channel-add',views.channel_add),  
     path('super/channel-insert',views.channel_insert), 
     path('super/channels',views.channels),  
@@ -51,12 +53,12 @@ urlpatterns = [
     path('super/amenities-type-delete/<int:id>', views.amenities_type_destroy),
     
 # activity
-    path('super/activity',views.activity),  
-    path('super/activity-add',views.activity_add),
-    path('super/activity-insert',views.activity_insert),  
-    path('super/activity-edit/<int:id>', views.activity_edit),  
-    path('super/activity-update/<int:id>', views.activity_update),  
-    path('super/activity-delete/<int:id>', views.activity_destroy),
+    path('super/nearby-amenities',views.nearby_amenities),
+    path('super/nearby-amenities-add',views.nearby_amenities_add),
+    path('super/nearby-amenities-insert',views.nearby_amenities_insert),
+    path('super/nearby-amenities-edit/<int:id>', views.nearby_amenities_edit),
+    path('super/nearby-amenities-update/<int:id>', views.nearby_amenities_update),
+    path('super/nearby-amenities-delete/<int:id>', views.nearby_amenities_destroy),
 
 # rentals
     path('super/rental-add',views.rental_add),
@@ -282,6 +284,9 @@ urlpatterns = [
     path('super/services-edit/<int:id>', views.services_edit),
     path('super/services-update/<int:id>', views.services_update),
     path('super/services-delete/<int:id>', views.services_destroy),
+
+    path('super/feedback', views.feedback),
+    path('super/feedback-delete/<int:id>', views.feedback_destroy),
 
     ]
 if settings.DEBUG:

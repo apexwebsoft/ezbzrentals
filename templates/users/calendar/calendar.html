@@ -44,13 +44,17 @@
                     </div>
                     <div class="card">
                     <div class="card-body">
+                      <div class="pt-3 pr-2">
+                        <a href="/bookings-add" class="btn btn-success pull-right mb-2"><i class="mdi mdi-plus me-1"></i> Add New</a>
+                </div>   
                       <div class="row mb-3">
                       <div class="col-sm-4">  
-                        <select name="rental" required="" id="id_rental" class="form-control select2">
+                        <select id="RentalID" class="form-control select2" name="rental_id" data-placeholder="--Select--">
+                          <option disabled>--select--</option>
                           {% for rental in rentals %}
-                              <option value="{{rental.id}}">{{rental.rental_name}}</option>
-                            {% endfor %}
-                        </select>
+                            <option value="{{ rental.id }}">{{ rental.rental_name }}</option>
+                          {% endfor %}
+                      </select>
                       </div>  
                     </div>
                  
@@ -74,6 +78,7 @@
               <script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
               <script src="/static/users/libs/simplebar/simplebar.min.js"></script>
               <script src="/static/users/libs/node-waves/waves.min.js"></script>
+           
               <script src="/static/users/libs/select2/js/select2.min.js"></script>
               <script src="/static/users/js/pages/ecommerce-add-product.init.js"></script>
               <script src="/static/users/js/app.js"></script>
@@ -90,7 +95,7 @@
                         right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
                       },
                       initialDate: today,
-                      navLinks: true, // can click day/week names to navigate views
+                      navLinks: true, 
                       selectable: true,
                       selectMirror: true,
                       select: function(arg) {
@@ -99,56 +104,71 @@
                         modal.style.display = 'block'
                         calendar.unselect()
                       },
-                      // THIS KEY WON'T WORK IN PRODUCTION!!!
-                      // To make your own Google API key, follow the directions here:
-                      // http://fullcalendar.io/docs/google_calendar/
-                      // googleCalendarApiKey: 'AIzaSyCqCxjjLtjbtkX37aOtWB8OfwBLy_6QuYk',
-
-                      // bangladesh Holidays
-                      // events: 'bn.bd#holiday@group.v.calendar.google.com',
+               
                       eventClick: function(arg) {
                         if (confirm('Are you sure you want to delete this event?')) {
                           arg.event.remove()
                         }
                       },
                       editable: true,
-                      dayMaxEvents: true, // allow "more" link when too many events
-                      events: {{ events|safe }},
-                      // events: [
-                      //   {
-                      //     title: 'All Day Event',
-                      //     start: '2021-06-26'
-                      //   },
-                      //   {
-                      //     groupId: 999,
-                      //     title: 'Repeating Event',
-                      //     start: '2020-09-16T16:00:00'
-                      //   },
-                      //   {
-                      //     title: 'Conference',
-                      //     start: '2020-09-11',
-                      //     end: '2020-09-13'
-                      //   },
-                      //   {
-                      //     title: 'Click for Google',
-                      //     url: 'http://google.com/',
-                      //     start: '2020-09-28'
-                      //   }
-                      // ]
-                    });
+                      dayMaxEvents: true, 
+                      events: {{ events|safe }}, // Existing events
+            
+            // Add the following code to block specific dates
+            eventDidMount: function(info) {
+                var event = info.event;
+                var eventStart = event.start;
+                var eventEnd = event.end;
 
-                    calendar.render();
-                  });
-                  const closeBtn1 = document.getElementById('modalClose1');
-                  const closeBtn2 = document.getElementById('modalClose2');
-                  closeBtn1.addEventListener('click',()=>{
-                    const eventModal = document.getElementById('eventModal')
-                    eventModal.style.display = 'none';
-                  });
-                  closeBtn2.addEventListener('click',()=>{
-                    const eventModal = document.getElementById('eventModal')
-                    eventModal.style.display = 'none';
-                  });
+                calendar.getEvents().forEach(function(existingEvent) {
+                    var existingEventStart = existingEvent.start;
+                    var existingEventEnd = existingEvent.end;
+
+                    // Check if the current event overlaps with an existing event
+                    if (
+                        (eventStart >= existingEventStart && eventStart < existingEventEnd) ||
+                        (eventEnd > existingEventStart && eventEnd <= existingEventEnd) ||
+                        (eventStart <= existingEventStart && eventEnd >= existingEventEnd)
+                    ) {
+                        // Disable the selectable property for the overlapping event
+                        event.setProp('selectable', false);
+                    }
+                });
+            }
+        });
+
+        calendar.render();
+    });
+
+    const closeBtn1 = document.getElementById('modalClose1');
+    const closeBtn2 = document.getElementById('modalClose2');
+    closeBtn1.addEventListener('click', () => {
+        const eventModal = document.getElementById('eventModal');
+        eventModal.style.display = 'none';
+    });
+    closeBtn2.addEventListener('click', () => {
+        const eventModal = document.getElementById('eventModal');
+        eventModal.style.display = 'none';
+    });
+</script>
+              <script>
+                $(document).ready(function() {
+                  $('#RentalID').select2();
+                  $('#RentalID').on('select2:select', function (e) {
+                    var rentalId = e.params.data.id;
+                $.ajax({
+                    url: '/rental-calendar/' + rentalId ,
+                    type: 'GET',
+                    success: function () {
+                        window.location.href = '/rental-calendar/' + rentalId ;
+                    },
+                    error: function () {
+                        console.log('Error fetching URL');
+                    }
+                });
+                $(this).select2('data', {id: rentalId, text: e.params.data.text});
+              });
+              });
               </script>
               
               </body>

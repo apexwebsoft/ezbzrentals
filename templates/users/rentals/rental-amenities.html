@@ -66,7 +66,7 @@
                                   
                                   {%for amenities in amenities %}
                                   {% if amntype.id == amenities.amenities_type_id %}                                     
-                                  <li><input type="checkbox" name="amenities[]" class="form-check-input" value="{{amenities.title}}" {% if amenities.title in amentitle %} checked="checked" {% endif %}>{{amenities.title}}</li>
+                                  <li><input type="checkbox" name="amenities[]" class="form-check-input" value="{{amenities.code}}" {% if amenities.code in amentitle %} checked="checked" {% endif %}>{{amenities.title}}</li>
                                   {% endif %}
                                   {% endfor %}
                                 </ul>
@@ -77,14 +77,83 @@
                 </div>
                 <div class="mb-3">
                   <input type="submit" class="btn btn-primary" value="Save">
-              </form>
-            </div>
+                  <div>
+              </form><br>
+
+
+
+              <form method="POST" enctype="multipart/form-data" class="post-form" action="/attraction-insert/{{rental.id}}">
+                {% csrf_token %}
+                <div class="container">
+                <div class="row">
+                <div class="row mb-3">
+                    <div class="col-lg-6">
+                    <label class="form-label fw6" for="productname">Nearby Amenities</label>
+                    <select id="currency-select" name="nearbyamenities"  class="form-control select2" required>
+                      {% for currency in nearby %}
+                      <option value="{{currency.code}}" {% if currency.code == rentalnearby.nearby %} selected {% endif %}>{{currency.title}}</option>
+                      {% endfor %}                                      
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-6" id="tooltip-container">
+                        <label class="form-label fw6">Distance </label>
+                        <input id="basic-night-input" type="text" name="distance" class="form-control">
+                    </div>
+                </div>
+            <div class="mb-3">
+              <input type="submit" class="btn btn-primary" value="Save">
+            <div>
+            </form>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+              <div class="card">   
+                           
+                  <div class="card-body">                                              
+                       
+                      <table id="datatable" class="table table-bordered dt-responsive nowrap"
+                          style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                          <thead>
+                              <tr>  
+                                  
+                                
+                                  <th>Nearby Amenities</th>
+                                  <th>Distance</th>    
+                                  <th>Actions</th>
+                              </tr>  
+                          </thead>  
+  <tbody>  
+   {% for aman in rentalnearby %}  
+  <tr>  
+      
+      <td>{{aman.nearbyamenities }}</td> 
+      <td>{{aman.distance }}</td> 
+      
+      <td class="text-left">                                                       
+        
+          <a href="/users/amenities-delete/{{ aman.id}}"class="text-danger" onclick="return DelItem();"  data-bs-toggle="tooltip" data-placement="top" title="" data-bs-original-title="Delete" aria-label="Delete"><i class="mdi mdi-trash-can font-size-18"></i></a>
+      </td>
+     
+      
+  </tr>  
+{% endfor %}  
+</tbody>  
+</table> 
+</div>
+</div>
+</div>
+</div>
+
           </div>
         </div>
       </div>
     </div>
-    </div>    
-    </div>
+  </div>    
+</div>
 </div>
 {% include 'users/base/footer.html'%} 
 </div>

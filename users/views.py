@@ -9,12 +9,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from rentals.forms import InvoiceForm, InvoiceItemFormset
-from rentals.models import  AccountSetting, Activity, Amenities, AmenitiesType, Attributes, BasicRates, Bed, Bookings, Channel, ChannelManagement, CompanyProfile, Country, CustomServices, Discount, Currency, DiscountType, EarlyBirdDiscount, ExtraServices, Feedback, HouseRules, Invoice, InvoiceItem, LongStayDiscount, Notification, OtherRooms, PropertyRole, Rate, Ratetype, Rental, RentalAmenities, RentalBasic, RentalBed, RentalBookingRules, RentalCleaning, RentalDeposit, RentalInstruction, RentalLocation, RentalOtherRooms, RentalPolicy, RentalRoom, RentalTax, RentalsGallery, Rentaltype,Policy, Room, Roomtype, SeasonalRates, Subscription, SubscriptionPlan, Tax, Taxtype, UserProfile
+from rentals.models import  AccountSetting, Activity, Amenities, AmenitiesType, Attributes, BasicRates, Bed, Bookings, Channel, ChannelManagement, CompanyProfile, Country, CustomServices, Discount, Currency, DiscountType, EarlyBirdDiscount, ExtraServices, Feedback, HouseRules, Invoice, InvoiceItem, LongStayDiscount, NearByAmenities, Notification, OtherRooms, PropertyRole, Rate, Ratetype, Rental, RentalAmenities, RentalBasic, RentalBed, RentalBookingRules, RentalCleaning, RentalDeposit, RentalInstruction, RentalLocation, RentalNearByAmenities, RentalOtherRooms, RentalPolicy, RentalRoom, RentalTax, RentalsGallery, Rentaltype,Policy, Room, Roomtype, SeasonalRates, Subscription, SubscriptionPlan, Tax, Taxtype, UserProfile
 from django.contrib.auth.models import User
 from django.views import View 
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
-from users.serializers import BookingsSerializer, RentalSerializer
+from users.serializers import BedSerializer, BookingsSerializer, RentalSerializer
 from django.http import JsonResponse
 from rentals.models import  Event
 from rentals.forms import EventForm
@@ -23,11 +23,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+from django.core.mail import EmailMessage, send_mail
+from ezbzrental import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth import authenticate, login, logout
 from users.tokens import generate_token
 import ast
+
 
 # Create your views here.
 
@@ -97,7 +102,7 @@ def signup(request):
         myuser = User.objects.create_user(username, email, pass1)
         myuser.first_name = fname
         myuser.last_name = lname
-        myuser.is_active = True
+        myuser.is_active = False
         myuser.save()
         messages.success(request, "Your Account has been created succesfully!! Please check your email to confirm your email address in order to activate your account.")
         LastInsertId = (User.objects.last()).id
@@ -107,7 +112,6 @@ def signup(request):
         
             UserProfiles = UserProfile() 
             UserProfiles.first_name = 'NA'
-            UserProfiles.profile_photo = ''
             UserProfiles.last_name = 'NA'
             UserProfiles.phone = 'NA'
             UserProfiles.address = 'NA'
@@ -118,7 +122,7 @@ def signup(request):
             UserProfiles.property_phone_number = 'NA'
             UserProfiles.tollfree = 'NA'
             UserProfiles.website = 'NA'
-            UserProfiles.property_logo = ''
+            UserProfiles.property_logo = 'NA'
             UserProfiles.status = '1'
             UserProfiles.birth_date = 'NA' 
             UserProfiles.language =   'NA'
@@ -126,32 +130,31 @@ def signup(request):
             UserProfiles.gender =   'NA'
             UserProfiles.user_id =  LastRow.id           
             UserProfiles.save()
-
-        # # Welcome Email
-        # subject = "Welcome to GFG- Django Login!!"
-        # message = "Hello " + myuser.first_name + "!! \n" + "Welcome to GFG!! \nThank you for visiting our website\n. We have also sent you a confirmation email, please confirm your email address. \n\nThanking You\nAnubhav Madhav"        
-        # from_email = settings.EMAIL_HOST_USER
-        # to_list = [myuser.email]
-        # send_mail(subject, message, from_email, to_list, fail_silently=True)
+        # Welcome Email
+        subject = "Welcome to GFG- Django Login!!"
+        message = "Hello " + myuser.first_name + "!! \n" + "Welcome to GFG!! \nThank you for visiting our website\n. We have also sent you a confirmation email, please confirm your email address. \n\nThanking You\nAnubhav Madhav"
+        from_email = settings.EMAIL_HOST_USER
+        to_list = [myuser.email]
+        send_mail(subject, message, from_email, to_list, fail_silently=True)
         
-        # # Email Address Confirmation Email
-        # current_site = get_current_site(request)
-        # email_subject = "Confirm your Email @ GFG - Django Login!!"
-        # message2 = render_to_string('email_confirmation.html',{
+        # Email Address Confirmation Email
+        current_site = get_current_site(request)
+        email_subject = "Confirm your Email @ GFG - Django Login!!"
+        message2 = render_to_string('email_confirmation.html',{
             
-        #     'name': myuser.first_name,
-        #     'domain': current_site.domain,
-        #     'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
-        #     'token': generate_token.make_token(myuser)
-        # })
-        # email = EmailMessage(
-        # email_subject,
-        # message2,
-        # settings.EMAIL_HOST_USER,
-        # [myuser.email],
-        # )
-        # email.fail_silently = True
-        # email.send()
+            'name': myuser.first_name,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
+            'token': generate_token.make_token(myuser)
+        })
+        email = EmailMessage(
+        email_subject,
+        message2,
+        settings.EMAIL_HOST_USER,
+        [myuser.email],
+        )
+        email.fail_silently = True
+        email.send()
         
         return redirect('/')
         
@@ -188,7 +191,7 @@ def signin(request):
                 login(request, user)
                 fname = user.first_name
                 # messages.success(request, "Logged In Sucessfully!!")
-                return redirect('/dashboard')
+                return render(request, "users/dashboard/dashboard.html",{"fname":fname})
             else:
                 messages.error(request, "Bad Credentials!!")
                 return redirect('/')
@@ -310,6 +313,13 @@ def rental_insert(request):
         rentalbasic.floorspace=""
         rentalbasic.floorspace_units=""
         rentalbasic.grounds=""
+        rentalbasic.rooms=""
+        rentalbasic.bathrooms=""
+        rentalbasic.toilets=""
+        rentalbasic.total_beds=""
+        rentalbasic.persons=""
+        rentalbasic.childs=""
+        rentalbasic.living_room=""
         rentalbasic.grounds_units=""
         rentalbasic.floors_building=""
         rentalbasic.entrance=""
@@ -326,6 +336,8 @@ def rental_insert(request):
         location.city=""
         location.state=""
         location.postal=""
+        location.latitude=""
+        location.longitude=""
         location.user_id=request.user.id
         location.rental_id=LastRow.id
         location.skip_signals=True
@@ -344,20 +356,6 @@ def rental_insert(request):
         rentalchannel.rental_id=LastRow.id
         rentalchannel.skip_signals=True
         rentalchannel.save()
-
-
-        bookingrules=RentalBookingRules()
-        bookingrules.before_checkin_allow=""
-        bookingrules.prefered_policy=""
-        bookingrules.additional_policy_increase=""
-        bookingrules.rates_increase=""
-        bookingrules.additional_policy_decrease=""
-        bookingrules.rates_decrease=""
-        bookingrules.user_id=request.user.id
-        bookingrules.rental_id=LastRow.id
-        bookingrules.skip_signals=True
-        bookingrules.save()
-
 
 
         longstaydiscount=LongStayDiscount()
@@ -386,10 +384,22 @@ def rental_insert(request):
         houserules.parties_allowed=""
         houserules.smoking_allowed=""
         houserules.pets=""
+        houserules.pets_charge=""
         houserules.house_rules=""
         houserules.user_id=request.user.id
         houserules.rental_id=LastRow.id
         houserules.skip_signals=True
+        houserules.save()
+
+        bookingrules=RentalBookingRules()
+        bookingrules.before_checkin_allow=""
+        bookingrules.prefered_policy=""
+        bookingrules.additional_policy_increase=""
+        bookingrules.rates_increase=""
+        bookingrules.additional_policy_decrease=""
+        bookingrules.rates_decrease=""
+        houserules.user_id=request.user.id
+        houserules.rental_id=LastRow.id
         houserules.save()
 
         rentalpolicy=RentalPolicy()
@@ -557,6 +567,8 @@ def rental_update(request, id):
 @login_required(login_url='/')
 def rental_destroy(request, id):  
     rental= Rental.objects.get(id=id)
+    if rental.rental_logo:
+        rental.rental_logo.delete()
     rental.delete()  
     return redirect("/users/rentals")  
 
@@ -584,6 +596,13 @@ def rental_basic_update(request,id):
         rentalbasic.floorspace=request.POST.get('floorspace')
         rentalbasic.floorspace_units=request.POST.get('floorspace_units')
         rentalbasic.grounds=request.POST.get('grounds')
+        rentalbasic.rooms=request.POST.get('rooms')
+        rentalbasic.bathrooms=request.POST.get('bathrooms')
+        rentalbasic.toilets=request.POST.get('toilets')
+        rentalbasic.total_beds=request.POST.get('total_beds')
+        rentalbasic.persons=request.POST.get('persons')
+        rentalbasic.childs=request.POST.get('childs')
+        rentalbasic.living_room=request.POST.get('living_room')
         rentalbasic.grounds_units=request.POST.get('grounds_units')
         rentalbasic.floors_building=request.POST.get('floors_building')
         rentalbasic.entrance=request.POST.get('entrance')
@@ -621,6 +640,8 @@ def rental_location_update(request,id):
         rentallocation.city=request.POST.get("city")
         rentallocation.state=request.POST.get("state")
         rentallocation.postal=request.POST.get("postal")
+        rentallocation.longitude=request.POST.get("longitude")
+        rentallocation.latitude=request.POST.get("latitude")
         rentallocation.save()
     messages.success(request, 'Data Updated Successfully.')    
     return redirect(request.META.get('HTTP_REFERER'))    
@@ -763,6 +784,8 @@ def rental_amenities(request,id):
     rental=Rental.objects.get(id=id)
     rentalamenities=RentalAmenities.objects.get(rental_id=rental.id)
     amenities=Amenities.objects.all()
+    nearby=NearByAmenities.objects.all()
+    rentalnearby=RentalNearByAmenities.objects.filter(user_id=request.user.id)
     amenitiestype=AmenitiesType.objects.all()
     
     
@@ -771,7 +794,11 @@ def rental_amenities(request,id):
         'amenitiestype':amenitiestype,
         'rentalamenities':rentalamenities,
         'rental_id':id,
-        'amentitle':rentalamenities.amenities
+        'amentitle':rentalamenities.amenities,
+        'nearby':nearby,
+        'rentalnearby':rentalnearby,
+        'rental':rental
+
 
     }
   
@@ -792,17 +819,51 @@ def rental_amenities_update(request,id):
 
 
 
+
+
 @login_required(login_url='/')
 def rental_basic_rates(request,id):
     rental=Rental.objects.get(id=id)
     basicrates=BasicRates.objects.get(rental_id=rental.id)
     currency=Currency.objects.all()
+
+    # response = requests.get('http://api.currencylayer.com/live',
+    #                     params={'access_key':'VgzmCqRMwjWi974VT7Hv6ecGMsRgJcKa','currencies': 'all'})
+    # data = response.text
+    # rates = data.get('quotes', {})
+    # print(rates)
+    # print(data)
+
+
+
+    # url = "https://api.apilayer.com/exchangerates_data/convert?to=INR&from=USD&amount=amount }"
+
+    # payload = {}
+    # headers= {
+    # "apikey": "VgzmCqRMwjWi974VT7Hv6ecGMsRgJcKa"
+    # }
+
+    # response = requests.request("GET", url, headers=headers, data = payload)
+
+    # status_code = response.status_code
+
+    # result = response.text
+    # print(result)
+
+
     context={
         'basicrates':basicrates,
         'currency':currency,
-        'rental_id':id
+        'rental_id':id,
     }
     return render(request,'users/rentals/rental-basic-rates.html',context)
+
+def exchange_rate(request, to_currency,from_currency, amount):
+    url = "https://api.apilayer.com/exchangerates_data/convert?to={}&from={}&amount={}".format(to_currency,from_currency, amount)
+    headers = {"apikey": "VgzmCqRMwjWi974VT7Hv6ecGMsRgJcKa"}
+    response = requests.get(url, headers=headers)
+    result = response.text
+    return HttpResponse(result)
 
 
 @login_required(login_url='/')
@@ -1056,7 +1117,6 @@ def rental_tax_insert(request,id):
 @login_required(login_url='/')
 def rental_tax_update(request,id):
     rentaltax=RentalTax.objects.get(id=id)
-    rental=Rental.objects.get(id=id)
     if request.method == "POST": 
         rentaltax.tax_type=request.POST.get('tax_type')
         rentaltax.fee_basis=request.POST.get('fee_basis') 
@@ -1097,7 +1157,6 @@ def rental_extra_services_insert(request,id):
 
 @login_required(login_url='/')
 def rental_extra_services_update(request,id):
-    rental=Rental.objects.get(id=id)
     if request.method == "POST": 
         extraservices=ExtraServices.objects.get(id=id)
         extraservices.service_name=request.POST.get('service_name')
@@ -1176,6 +1235,9 @@ def rental_house_rules(request,id):
     }
     return render(request,'users/rentals/rental-house-rules.html',context) 
 
+
+
+
 @login_required(login_url='/')
 def rental_house_rules_update(request,id):
     if request.method == "POST": 
@@ -1185,10 +1247,35 @@ def rental_house_rules_update(request,id):
         houserules.parties_allowed=request.POST.get('parties_allowed')
         houserules.smoking_allowed=request.POST.get('smoking_allowed')
         houserules.pets=request.POST.get('pets')
+        houserules.pets_charge=request.POST.get('pets_charge')
         houserules.house_rules=request.POST.get('house_rules')
         houserules.save()
         messages.success(request, 'Data Updated Successfully.')
     return redirect(request.META.get('HTTP_REFERER'))         
+
+@login_required(login_url='/')
+def rental_booking_rules(request,id):
+    rental=Rental.objects.get(id=id)
+    bookingrules=RentalBookingRules.objects.get(rental_id=rental.id)
+    context={
+        'bookingrules':bookingrules,
+        'rental_id':id
+    }
+    return render(request,'users/rentals/rental-booking-rules.html',context)
+
+@login_required(login_url='/')
+def rental_booking_rules_update(request,id):
+    if request.method == "POST":
+        bookingrules=RentalBookingRules.objects.get(id=id)
+        bookingrules.before_checkin_allow=request.POST.get('before_checkin_allow')
+        bookingrules.prefered_policy=request.POST.get('prefered_policy')
+        bookingrules.additional_policy_increase=request.POST.get('additional_policy_increase')
+        bookingrules.rates_increase=request.POST.get('rates_increase')
+        bookingrules.additional_policy_decrease=request.POST.get('additional_policy_decrease')
+        bookingrules.rates_decrease=request.POST.get('rates_decrease')
+        bookingrules.save()
+        messages.success(request, 'Data Updated Successfully.')
+    return redirect(request.META.get('HTTP_REFERER'))
 
 @login_required(login_url='/')
 def rental_policy(request,id):
@@ -1293,7 +1380,7 @@ def channels(request):
         return render(request,"users/rentals/rentals.html",context)
     else:      
         channels = Channel.objects.all()
-        rentals=Rental.objects.filter(user_id=request.user.id)
+        rentals=Rental.objects.all()
         context={
             'channels':channels,
             'rentals':rentals
@@ -1304,8 +1391,18 @@ def channels(request):
 
 @login_required(login_url='/')
 def channel_edit(request, id):  
-    channel= Channel.objects.get(id=id)  
-    return render(request,'users/channels/channel-edit.html', {'channel':channel})  
+    rental=Rental.objects.get(id=id)
+    rentals=Rental.objects.all()
+    rentalchannel=ChannelManagement.objects.get(rental_id=rental.id)
+    channels=Channel.objects.all()
+    context={
+        'channels':channels,
+        'rental_id':id,
+        'rentalchannel':rentalchannel,
+        'channeltype':rentalchannel.channels,
+        'rentals':rentals
+    }
+    return render (request,'users/channels/channel-edit.html',context)
 
 
 @login_required(login_url='/')
@@ -1408,10 +1505,10 @@ def booking(request):
 @login_required(login_url='/')
 def booking_edit(request, id):
     bookings=Bookings.objects.get(id=id) 
-    channels=Channel.objects.all()
+    rentals=Rental.objects.filter(user_id=request.user.id)
     context={
         'bookings':bookings,
-        'channels':channels
+        'rentals':rentals
     }
     return render (request,'users/bookings/booking-edit.html',context)    
 
@@ -1421,8 +1518,7 @@ def booking_update(request ,id):
     bookings=Bookings.objects.get(id=id) 
     channels=Channel.objects.all()
     if request.method == "POST":
-        bookings.rental=request.POST.get('rental')
-        bookings.channel_id=request.POST.get('channel')
+        bookings.rental_id=request.POST.get('rental')
         bookings.booking_type=request.POST.get('booking_type')
         bookings.first_name =  request.POST.get('first_name')
         bookings.last_name =  request.POST.get('last_name')
@@ -1438,7 +1534,7 @@ def booking_update(request ,id):
         
         bookings.save()
         messages.success(request, ' Row updated Successfully.')
-        return redirect('/users/bookings') 
+        return redirect('/bookings')
         
     context={
         'bookings':bookings,
@@ -2066,7 +2162,8 @@ def tax_edit(request, id):
         'tax':tax,
         'taxtype':taxtype
     }
-    return render(request,'users/tax/tax-edit.html',context)  
+
+    return render(request,'users/tax/tax-edit.html',context)
 
 
 @login_required(login_url='/')
@@ -2240,6 +2337,11 @@ class RentalViewSet(viewsets.ModelViewSet):
     queryset = Rental.objects.all()
     serializer_class = RentalSerializer
 
+class BedViewSet(viewsets.ModelViewSet):
+    queryset = RentalBed.objects.all()
+    serializer_class = BedSerializer
+
+
 
 class BookingsViewSet(viewsets.ModelViewSet):
     queryset = Bookings.objects.all()
@@ -2354,6 +2456,8 @@ def rentals_gallery_insert(request, id):
 
         data = {'is_valid': True, 'name': rental.image.name, 'url': rental.image.url}
 
+
+
     else:
 
         data = {'is_valid': False}
@@ -2377,25 +2481,22 @@ class CalendarViewNew(LoginRequiredMixin, generic.View ):
             
             forms = self.form_class()
             rentals=Rental.objects.filter(user_id=request.user.id)
-            events = Event.objects.get_all_events(user=request.user)
-            events_month = Event.objects.get_running_events(user=request.user)
-            event_list = []
-            # start: '2020-09-16T16:00:00'
-            # for event in events & cal:
-            #     event_list.append(
-            #         {
-            #             "title": event.title,
-            #             "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-            #             "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+            bookings = Bookings.objects.filter(user_id=request.user.id)
 
-            #         }
-            #     )
+            event_list = []
+            for event in bookings :
+                event_list.append(
+                    {
+
+                        "start": event.check_in.strftime("%Y-%m-%dT%H:%M:%S"),
+                        "end": event.check_out.strftime("%Y-%m-%dT%H:%M:%S"),
+
+                    }
+                )
             context = {"form": forms, "events": event_list,
-                    "events_month": events_month,
+
                     "rentals":rentals,
-                    # "rental":rental,
-                    # "cal":cal
-            }
+                    }
             return render(request, self.template_name, context)
 
 
@@ -2406,9 +2507,14 @@ class CalendarViewNew(LoginRequiredMixin, generic.View ):
                 form.user = request.user
                 form.rental_id = 53
                 form.save() 
-                return redirect("/calendar")
+                return redirect("/calendar/85")
             context = {"form": forms}
             return render(request, self.template_name, context)
+
+# def rental_cal(request, id):
+#     rental = Rental.objects.get(id=id)
+#     return render (request,"users/calendar/rental-calendar.html")
+
 
 @login_required(login_url='/')
 def cal_destroy(request, id):  
@@ -2417,8 +2523,8 @@ def cal_destroy(request, id):
     return redirect("/users/calendar")
 
 
-
 import datetime
+import calendar
 @login_required(login_url='/')
 def profile(request):
     current_year = datetime.date.today().year
@@ -2431,7 +2537,7 @@ def profile(request):
     
     users = UserProfile.objects.get(user_id=request.user.id)
     selected_languages= users.language_spoken
-    # lang = ast.literal_eval(selected_languages)
+    lang = ast.literal_eval(selected_languages)
     
     country=Country.objects.all()
     propertyrole=PropertyRole.objects.all()
@@ -2441,10 +2547,9 @@ def profile(request):
         'propertyrole':propertyrole,
         'dates': dates,
         'selected_languages':selected_languages,
-        # 'lang':lang
+        'lang':lang
     }
     return render(request,"users/user/profile.html",context)
-
 
 @login_required(login_url='/')
 def profile_update(request,id):
@@ -2455,8 +2560,6 @@ def profile_update(request,id):
         birth_dates = "-".join([year, month, day])
         users = UserProfile.objects.get(id=id)
         users.first_name =  request.POST.get('first_name')
-        if 'profile_photo' in request.FILES:
-            users.profile_photo =  request.FILES.get('profile_photo')
         users.last_name =  request.POST.get('last_name')
         users.phone =  request.POST.get('phone')
         users.address =  request.POST.get('address')
@@ -2469,15 +2572,48 @@ def profile_update(request,id):
         users.website =  request.POST.get('website')
         users.property_role =  request.POST.get('property_role')
         users.no_of_properties =  request.POST.get('no_of_properties')
-        users.description =  request.POST.get('description')   
+        users.description =  request.POST.get('description')
         users.birth_date =  birth_dates
         users.language =  request.POST.get('language') 
         users.language_spoken =  request.POST.getlist('language_spoken') 
         users.gender =   request.POST.get('gender')
         users.save()
-
         messages.success(request, 'Row updated Successfully.')
         return redirect ('/profile')
+
+# @login_required(login_url='/')
+# def account_setting(request):
+#     try:
+#         account = AccountSetting.objects.get(rental_id=id)
+#         victory=rentalroom.name
+#         roomname = ast.literal_eval(victory)
+#         num=rentalroom.no_of_rooms
+#         numroom = ast.literal_eval(num)
+#         data=[]
+#         for roomtitle, roomnumb in zip(roomname, numroom):
+#            data.append({'roomtitle': roomtitle, 'roomnumb': roomnumb})
+#         created = False
+#     except RentalRoom.DoesNotExist:
+#         rentalroom = RentalRoom(rental_id=id)
+#         created = True
+#         data = []
+#     account = AccountSetting.objects.get(user_id=request.user.id)
+#     context={
+#         'account':account,
+#     }
+#     return render(request,"users/user/account-setting.html",context)
+
+# @login_required(login_url='/')
+# def account_setting_update(request,id):
+#     if request.method == "POST":
+#         account = AccountSetting.objects.get(id=id)
+#         account.account_type =  request.POST.get('first_name')
+#         account.account_email_address =  request.POST.get('last_name')
+#         account.prefered_currency =  request.POST.get('phone')
+#         account.selected_plan =  request.POST.get('address')
+#         account.save()
+#         messages.success(request, 'Row updated Successfully.')
+#         return redirect ('/account-setting')
 
 @login_required(login_url='/')
 def subscription(request):
@@ -2527,87 +2663,25 @@ def my_view(request):
         context = {'error_msg': error_msg}
         return render(request, '404.html', context)
 
-def chart(request):
-    return render(request,'users/analytics/analytics.html')
 
 
+# from googletrans import Translator
 
-class RentalViewSet(viewsets.ModelViewSet):
-    queryset = Rental.objects.all()
-    serializer_class = RentalSerializer
+# class GoogleTranslateMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
 
-class RentalBasicViewSet(viewsets.ModelViewSet):
-    queryset = RentalBasic.objects.all()
-    serializer_class = RentalBasicSerializer
-
-class RentalsGalleryViewSet(viewsets.ModelViewSet):
-    queryset = RentalsGallery.objects.all()
-    serializer_class = RentalGallerySerializer
-
-class RentalsLocationViewSet(viewsets.ModelViewSet):
-    queryset = RentalLocation.objects.all()
-    serializer_class = RentalLocationSerializer
-
-class RentalsOtherRoomViewSet(viewsets.ModelViewSet):
-    queryset = RentalOtherRooms.objects.all()
-    serializer_class = RentalOtherRoomSerializer
-
-class RentalAmenitiesViewSet(viewsets.ModelViewSet):
-    queryset = RentalAmenities.objects.all()
-    serializer_class = RentalAmenitiesSerializer
-
-class RentalBasicRatesViewSet(viewsets.ModelViewSet):
-    queryset = BasicRates.objects.all()
-    serializer_class = RentalBasicRatesSerializer
-
-class RentalSeasonalRatesViewSet(viewsets.ModelViewSet):
-    queryset = SeasonalRates.objects.all()
-    serializer_class = RentalSeasonalRatesSerializer
-
-class RentalDepositViewSet(viewsets.ModelViewSet):
-    queryset = RentalDeposit.objects.all()
-    serializer_class = RentalDepositSerializer
-
-class RentalLongStayDiscountViewSet(viewsets.ModelViewSet):
-    queryset = LongStayDiscount.objects.all()
-    serializer_class = RentalLongStayDiscountSerializer
-
-class RentalEarlyBirdDiscountViewSet(viewsets.ModelViewSet):
-    queryset = EarlyBirdDiscount.objects.all()
-    serializer_class = RentalEarlyBirdDiscountSerializer
-
-class RentalCleaningViewSet(viewsets.ModelViewSet):
-    queryset = RentalCleaning.objects.all()
-    serializer_class = RentalCleaningSerializer
-
-class RentalTaxViewSet(viewsets.ModelViewSet):
-    queryset = RentalTax.objects.all()
-    serializer_class = RentalTaxSerializer
-
-class RentalExtraServicesViewSet(viewsets.ModelViewSet):
-    queryset = ExtraServices.objects.all()
-    serializer_class = RentalExtraServicesSerializer
-
-class RentalCustomServicesViewSet(viewsets.ModelViewSet):
-    queryset = CustomServices.objects.all()
-    serializer_class = RentalCustomServicesSerializer
-
-class RentalHouseRulesViewSet(viewsets.ModelViewSet):
-    queryset = HouseRules.objects.all()
-    serializer_class = RentalHouseRulesSerializer
-
-class RentalPolicyViewSet(viewsets.ModelViewSet):
-    queryset = RentalPolicy.objects.all()
-    serializer_class = RentalPolicySerializer
-
-class RentalInstructionViewSet(viewsets.ModelViewSet):
-    queryset = RentalInstruction.objects.all()
-    serializer_class = RentalInstructionSerializer
-
-class BookingsViewSet(viewsets.ModelViewSet):
-    queryset = Bookings.objects.all()
-    serializer_class = BookingsSerializer
-
+#     def __call__(self, request):
+#         if request.LANGUAGE_CODE != 'fr':  # don't translate if the language is already English
+#             translator = Translator()
+#             translated_request = request
+#             for key, value in request.GET.items():
+#                 translated_request.GET[key] = translator.translate(value, dest=request.LANGUAGE_CODE).text
+#             for key, value in request.POST.items():
+#                 translated_request.POST[key] = translator.translate(value, dest=request.LANGUAGE_CODE).text
+#             request = translated_request
+#         response = self.get_response(request)
+#         return response
 
 def rental_channel(request, rental_id):
     rental = Rental.objects.get(id=rental_id)
@@ -2617,6 +2691,42 @@ def rental_channel(request, rental_id):
         'channels': channels
     }
     return render(request, 'users/rentals/rental-discount.html', context)
+
+def rental_calendar(request, rental_id):
+    rentals=Rental.objects.filter(user_id=request.user.id)
+    rental = Rental.objects.get(id=rental_id)
+    events = Event.objects.get_all_events(user=request.user)
+    events_month = Event.objects.get_running_events(user=request.user)
+    basicrates=BasicRates.objects.get(rental_id=rental.id)
+    # r=basicrates.basic_night
+    # r1=basicrates.weekend_night
+    # rental_data = []
+    # for rental in basicrates:
+    #     rental_data.append({
+    #         'id': rental.id,
+    #         'basic_night': r,
+    #         'weekend_night': r1,
+
+    #     })
+
+    event_list = []
+    for event in events :
+        event_list.append(
+            {
+                "title": event.title,
+                "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+
+            }
+        )
+    context = { "events": event_list,
+            "events_month": events_month,
+            "rentals":rentals,'rental': rental,
+        'rentals':rentals,'basicrates':basicrates,
+            }
+
+
+    return render(request, 'users/calendar/rental-calendar.html', context)
 
 
 import requests
@@ -2721,15 +2831,15 @@ def notification(request):
         created = True
 
     if request.method == 'POST':
-        notification.newsletter =  request.POST.get('newsletter')
-        notification.blog_updates =  request.POST.get('blog_updates')
-        notification.new_channel_announcement =  request.POST.get('new_channel_announcement')
-        notification.surveys =  request.POST.get('surveys')
-        notification.booking_notification =  request.POST.get('booking_notification')
-        notification.payout_notification =  request.POST.get('payout_notification')
-        notification.guest_review =  request.POST.get('guest_review')
-        notification.guest_notification =  request.POST.get('guest_notification')
-        notification.calendar_update =  request.POST.get('calendar_update')
+        notification.newsletter =  request.POST.get('newsletter') == 'on'
+        notification.blog_updates =  request.POST.get('blog_updates') == 'on'
+        notification.new_channel_announcement =  request.POST.get('new_channel_announcement') == 'on'
+        notification.surveys =  request.POST.get('surveys') == 'on'
+        notification.booking_notification =  request.POST.get('booking_notification') == 'on'
+        notification.payout_notification =  request.POST.get('payout_notification') == 'on'
+        notification.guest_review =  request.POST.get('guest_review') == 'on'
+        notification.guest_notification =  request.POST.get('guest_notification') == 'on'
+        notification.calendar_update =  request.POST.get('calendar_update') == 'on'
         notification.save()
         messages.success(request, ' Data added Successfully.')
 
@@ -2743,189 +2853,77 @@ def notification(request):
 
 def feedback(request):
     
-    try:
-        feedback = Feedback.objects.get(user_id=request.user.id)
-        created = False
-    except Feedback.DoesNotExist:
-        feedback = Feedback(user_id=request.user.id)
-        created = True
+    # try:
+    #     feedback = Feedback.objects.get(user_id=request.user.id)
+    #     created = False
+    # except Feedback.DoesNotExist:
+    #     feedback = Feedback(user_id=request.user.id)
+    #     created = True
 
     if request.method == 'POST':
+        feedback=Feedback()
         feedback.rating =  request.POST.get('rating')
         feedback.feedback_category =  request.POST.get('feedback_category')
         feedback.description =  request.POST.get('description')
+        feedback.user_id =  request.user.id
         feedback.save()
+
         messages.success(request, ' Data added Successfully.')
 
-        if created:
-           return redirect(request.META.get('HTTP_REFERER'))
-        else:
-            return redirect(request.META.get('HTTP_REFERER'))
+        # if created:
+        #    return redirect(request.META.get('HTTP_REFERER'))
+        # else:
+        return redirect(request.META.get('HTTP_REFERER'))
 
-    return render(request, 'users/user/feedback.html', {'feedback': feedback})    
+    return render(request, 'users/user/feedback.html')
 
-
-def exchange_rate(request, to_currency,from_currency, amount):
-    url = "https://api.apilayer.com/exchangerates_data/convert?to={}&from={}&amount={}".format(to_currency,from_currency, amount)
-    headers = {"apikey": "VgzmCqRMwjWi974VT7Hv6ecGMsRgJcKa"}
-    response = requests.get(url, headers=headers)
-    result = response.text
-    return HttpResponse(result) 
 
 @login_required(login_url='/')
-def rental_booking_rules(request,id):
+def attraction_insert(request,id):
     rental=Rental.objects.get(id=id)
-    bookingrules=RentalBookingRules.objects.get(rental_id=rental.id)
-    context={
-        'bookingrules':bookingrules,
-        'rental_id':id
-    }
-    return render(request,'users/rentals/rental-booking-rules.html',context) 
-
-@login_required(login_url='/')
-def rental_booking_rules_update(request,id):
-    if request.method == "POST": 
-        bookingrules=RentalBookingRules.objects.get(id=id)
-        bookingrules.before_checkin_allow=request.POST.get('before_checkin_allow')
-        bookingrules.prefered_policy=request.POST.get('prefered_policy')
-        bookingrules.additional_policy_increase=request.POST.get('additional_policy_increase')
-        bookingrules.rates_increase=request.POST.get('rates_increase')
-        bookingrules.additional_policy_decrease=request.POST.get('additional_policy_decrease')
-        bookingrules.rates_decrease=request.POST.get('rates_decrease')
-        bookingrules.save()
-        messages.success(request, 'Data Updated Successfully.')
-    return redirect(request.META.get('HTTP_REFERER')) 
-
-
-def bookingpal_info(request):
-    """
-    Doc: https://developerstesting.channelconnector.com/documentation#/rest/api-endpoints/push-notification/push-notification-links
-    Sample payload:
-    {
-        "data": {
-            "bookLink": "https://newreservationnotification.link",
-            "cancelLink": "https://cancelreservation.link",
-            "asyncPush": "https://asyncpush.link",
-            "requestToBook": "https://requestToBook.link",
-            "reservationLink": "https://reservation.link"
-        }
-    }
-    """
     if request.method == "POST":
-        payload = {
-            "data": {
-                "bookLink": request.POST.get("bookLink", "https://newreservationnotification.link"),
-                "cancelLink": request.POST.get("cancelLink", "https://cancelreservation.link"),
-                "asyncPush": request.POST.get("asyncPush", "https://asyncpush.link"),
-                "requestToBook": request.POST.get("requestToBook", "https://requestToBook.link"),
-                "reservationLink": request.POST.get("reservationLink", "https://reservation.link")
-            }
-        }
-        response, data = BookingpalNotificationLinks().create(payload)
-        return JsonResponse(data)
-    else:
-        response, data = BookingpalNotificationLinks().fetch_all()
-        return JsonResponse(data)
+        attraction=RentalNearByAmenities()
+        attraction.nearbyamenities=request.POST.get('nearbyamenities')
+        attraction.distance=request.POST.get('distance')
+        attraction.user_id= request.user.id
+        attraction.rental_id= id
+        attraction.save()
+        messages.success(request, ' Row added Successfully.')
 
-@csrf_exempt
-def bookingpal_reservation(request):
-    """
-    Sample payload:
-    {
-        "reservationNotificationRequest": {
-            "reservationId": "107",
-            "productId": "1234816374",
-            "supplierId": "3731837",
-            "channelName": "Airbnb",
-            "confirmationId": "dasdasd",
-            "uniqueKey": "uniqueKey4",
-            "newState": "Cancelled",
-            "customerName": "John Smith",
-            "fromDate": "2016-03-13",
-            "toDate": "2016-03-13",
-            "adult": 2,
-            "child": 0,
-            "address": "asdasd",
-            "city": "asdasd",
-            "zip": "asdasd",
-            "country": "asdasd",
-            "state": "asdasd",
-            "email": "andrewtesttest222@gmail.com",
-            "phone": "4234234",
-            "notes": "customer test message",
-            "creditCardType": "MASTER_CARD",
-            "creditCardNumber": "23123123123213123",
-            "creditCardExpirationMonth": "12",
-            "creditCardExpirationYear": "2023",
-            "creditCardCid": "123",
-            "total": 105.94,
-            "commission": {
-            "channelCommission": 10,
-            "commission": 12
-            },
-            "rate": {
-            "originalRackRate": 400,
-            "netRate": 400,
-            "newPublishedRackRate": 422
-            }
-        },
-        "action": "CREATE"
-    }
-    """
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+def insert_booking(request):
     if request.method == "POST":
-        data = eval(request.body).get("reservationNotificationRequest")
-        rental_instance = Rental.objects.get(bookingpal_id=data.get("productId"))
-        userprofile_instance = UserProfile.objects.get(bookingpal_id=data.get("supplierId"))
-        channel_instance = Channel.objects.get(channel_title=data.get("channelName"))
+        bookings=Bookings()
+        bookings.rental_id=request.POST.get('rental')
+        bookings.booking_type=request.POST.get('booking_type')
+        bookings.first_name=request.POST.get('first_name')
+        bookings.last_name=request.POST.get('last_name')
+        bookings.email=request.POST.get('email')
+        bookings.phone=request.POST.get('phone')
+        bookings.address=request.POST.get('address')
+        bookings.city=request.POST.get('city')
+        bookings.state=request.POST.get('state')
+        bookings.country=request.POST.get('country')
+        bookings.postal_code=request.POST.get('postal_code')
+        bookings.check_in=request.POST.get('check_in')
+        bookings.check_out=request.POST.get('check_out')
+        bookings.user_id= request.user.id
+        bookings.save()
+        messages.success(request, ' Row added Successfully.')
 
-        # verify dates blocked/rates
+    return redirect('/calendar')
 
-        if eval(request.body).get("action") == "CREATE":
-            from django.db.models import Q
-            check_in_in_range = Q(check_in__lte=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"), check_out__gte=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"))
-            check_out_in_range = Q(check_in__lte=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"), check_out__gte=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"))
-            
-            existing_bookings = Bookings.objects.filter(check_in_in_range | check_out_in_range,
-                                                        rental=rental_instance.id,
-                                                        status=True)
-            if existing_bookings.exists():
-                return HttpResponse("Already booked for the provided dates")
 
-            booking_instance = Bookings.objects.create(
-                bookingpal_id=data.get("reservationId"),
-                rental=rental_instance.id,
-                user_id=userprofile_instance.user.id,
-                channel=channel_instance,
-                first_name=data.get("customerName").split(" ")[0],
-                last_name=" ".join(data.get("customerName").split(" ")[1:]),
-                email=data.get("email"),
-                phone=data.get("phone"),
-                address=data.get("address"),
-                city=data.get("city"),
-                state=data.get("state"),
-                country=data.get("country"),
-                postal_code=int(data.get("zip")),
-                check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d"),
-                check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d"),
-                status=True if eval(request.body).get("action") in ["CREATE","UPDATE"] else False,
-                created_at=datetime.datetime.now()
-            )
-        else:
-            booking_instance = Bookings.objects.get(bookingpal_id=data.get("reservationId"), channel=channel_instance)
-            booking_instance.first_name=data.get("customerName").split(" ")[0]
-            booking_instance.last_name=" ".join(data.get("customerName").split(" ")[1:])
-            booking_instance.email=data.get("email")
-            booking_instance.phone=data.get("phone")
-            booking_instance.address=data.get("address")
-            booking_instance.city=data.get("city")
-            booking_instance.state=data.get("state")
-            booking_instance.country=data.get("country")
-            booking_instance.postal_code=int(data.get("zip"))
-            booking_instance.check_in=datetime.datetime.strptime(data.get("fromDate"), "%Y-%m-%d")
-            booking_instance.check_out=datetime.datetime.strptime(data.get("toDate"), "%Y-%m-%d")
-            booking_instance.status=True if eval(request.body).get("action") in ["CREATE","UPDATE"] else False
-            booking_instance.status
-            booking_instance.save()
-        return HttpResponse("")
-    else:
-        return HttpResponse("Only POST method allowed!")
+def add_bookings(request):
+    rentals=Rental.objects.filter(user_id=request.user.id)
+    return render (request,'users/calendar/booking-add.html',{'rentals':rentals})
+
+
+
+def delete_bookings(id):
+    bookings=Bookings.objects.get(id=id)
+    bookings.delete()
+    return redirect('/bookings')
+

@@ -47,26 +47,21 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body mt-5">
-                          <form method="post" enctype="multipart/form-data" class="post-form" action="/users/booking-update/{{bookings.id}}"> 
+                          <form method="post" enctype="multipart/form-data" class="post-form" action="/booking-update/{{bookings.id}}"> 
                             {% csrf_token %} 
                             <div class="col-lg-10">                           
                             <div class="row mb-3">  
                               <label for="example-text-input" class="col-sm-3 col-form-label text-right">Rental<span class="strict">*</span></label>  
                               <div class="col-sm-9">  
-                                <input type="text" name="rental" class="form-control" placeholder="Rental"  id="id_rental" value="{{ bookings.rental}}">
+                                <select name="rental" required="" id="id_tax_type" class="form-control">
+                                  {% for rental in rentals %}
+                                      <option value="{{rental.id}}">{{rental.rental_name}}</option>
+                                    {% endfor %}
+                                </select>
                               </div>  
                             </div>
 
-                            <div class="row mb-3">  
-                                <label for="example-text-input" class="col-sm-3 col-form-label text-right">Channel:</label>  
-                                <div class="col-sm-9">  
-                                  <select name="channel"  id="id_channel" class="form-control">
-                                    {% for channel in channels %}
-                                        <option value="{{channel.id}}" {% if channel.id == channel.channels_id %} selected {% endif %}>{{channel.channel_title}}</option>
-                                    {% endfor %}
-                                  </select>
-                                </div>  
-                              </div> 
+                           
 
                               <div class="row mb-3">  
                               <label for="example-text-input" class="col-sm-3 col-form-label text-right">Type:<span class="strict">*</span></label>  
@@ -140,11 +135,11 @@
                               <div class="col-sm-9">  
                                 <div class="custom-control custom-radio">
                                   <input type="radio" id="customRadio1" name="status" value="1" class="custom-control-input" {% if bookings.status == 1 %} checked {% endif %}>
-                                  <label class="custom-control-label" for="customRadio1">Active</label>
+                                  <label class="custom-control-label" for="customRadio1">Accept</label>
                               </div>
                               <div class="custom-control custom-radio">
                                 <input type="radio" id="customRadio2" name="status" value="0" class="custom-control-input" {% if bookings.status == 0 %} checked {% endif %}>
-                                <label class="custom-control-label" for="customRadio2">InActive</label>
+                                <label class="custom-control-label" for="customRadio2">Reject</label>
                             </div>
                               </div>
                           </div> 

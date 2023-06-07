@@ -31,12 +31,13 @@
               <h5>Channels</h5>
             <form method="POST">{% csrf_token%}
               <div class="col-lg-4">
-                <select class="form-control select2" name="rental_id">
-                    {% for rental in rentals %}
-                      <option value="{{rental.id}}">{{rental.rental_name}}</option>
-                    {% endfor %}
-                </select>
-                
+                <select id="RentalID" class="form-control select2" name="rental_id" data-placeholder="--Select--">
+                  <option disabled>--select--</option>
+                  {% for rental in rentals %}
+                    <option value="{{ rental.id }}">{{ rental.rental_name }}</option>
+                  {% endfor %}
+              </select>
+               
               </div>
             </form>
               <hr>
@@ -44,7 +45,7 @@
                   {% for channel in channels %}
                 <div class="col-lg-3">
                     <div class="channel_list">
-                        <input type="checkbox" name="" class="form-check-input">
+                       
                         <img src="/media/{{channel.channel_image}}" class="img-thumbnail rounded-circle avatar-xl">
                         <h4>{{channel.channel_title}}</h4>                        
                     </div>
@@ -62,16 +63,33 @@
 </div>
 </div>
 <script src="/static/users/libs/jquery/jquery.min.js"></script>
+<script src="/static/users/js/ajax-response.js" type="text/javascript"></script>
 <script src="/static/users/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/static/users/libs/metismenu/metisMenu.min.js"></script>
 <script src="/static/users/libs/simplebar/simplebar.min.js"></script>
 <script src="/static/users/libs/node-waves/waves.min.js"></script>
-<script src="/static/users/libs/twitter-bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script>
-<script src="/static/users/libs/twitter-bootstrap-wizard/prettify.js"></script>
 <script src="/static/users/libs/select2/js/select2.min.js"></script>
 <script src="/static/users/js/pages/ecommerce-add-product.init.js"></script>
 <script src="/static/users/js/app.js"></script>
-
+<script>
+  $(document).ready(function() {
+    $('#RentalID').select2();
+    $('#RentalID').on('select2:select', function (e) {
+      var rentalId = e.params.data.id;
+  $.ajax({
+      url: '/rental-channel/' + rentalId ,
+      type: 'GET',
+      success: function () {
+          window.location.href = '/channels/' + rentalId ;
+      },
+      error: function () {
+          console.log('Error fetching URL');
+      }
+  });
+  $(this).select2('data', {id: rentalId, text: e.params.data.text});
+});
+});
+</script>
 
 </body>
 </html>

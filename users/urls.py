@@ -78,8 +78,6 @@ urlpatterns = [
     path('rentals/instruction-update/<int:id>', views.rental_instruction_update),
     path('rentals/select-channels/<int:id>', views.rental_select_channels),
     path('rentals/channel-update/<int:id>', views.rental_channel_update),
-    path('bookingpal-info/',views.bookingpal_info),
-    path('bookingpal-reservation/',views.bookingpal_reservation),
 
 
 # Channels  
@@ -192,7 +190,7 @@ urlpatterns = [
 # Calendar
     # path('calendar',views.calendar),
     # path('calendar/<int:id>',views.calendar),
-    path("calendar/<int:id>", views.CalendarViewNew.as_view(), name="calendar"),
+    path("calendar", views.CalendarViewNew.as_view(), name="calendar"),
     path("calendar-delete/<int:id>", views.cal_destroy),
     
 # Rental Gallery
@@ -229,8 +227,15 @@ urlpatterns = [
     path('update-rooms/<int:id>',views.update_rooms),
     path('insert-beds/<int:id>',views.insert_beds),
     path('api',views.my_view),
+    path('bookings-add',views.add_bookings),
+    path('booking-insert',views.insert_booking),
+    path('booking-edit/<int:id>',views.booking_edit),
+    path('booking-update/<int:id>',views.booking_update),
+    path('booking-delete/<int:id>',views.delete_bookings),
     path('demo-api',views.demo_api),
     path('rental-channel/<int:rental_id>',views.rental_channel),
+    path('rental-calendar/<int:rental_id>',views.rental_calendar),
+    path('attraction-insert/<int:id>',views.attraction_insert),
 
 
 

@@ -69,12 +69,12 @@
                   </div>
                   {% if rentalcleaning.cleaning_basis == "mandatory" or rentalcleaning.cleaning_basis == "optional" %}
                   <div class="col-lg-6" id="CleaningPrice2">
-                    <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                    <label class="form-label fw6">Price <span class="strict">*</span></label>
                     <input type="text" class="form-control" name="price" value="{{rentalcleaning.price}}">
                   </div>
                   {% else %}
                   <div class="col-lg-6 hide" id="CleaningPrice2">
-                    <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                    <label class="form-label fw6">Price <span class="strict">*</span></label>
                     <input type="text" class="form-control" name="price" value="{{rentalcleaning.price}}">
                   </div>
                   {% endif %}
@@ -91,7 +91,7 @@
                     </select>
                   </div>
                   <div class="col-lg-6 hide" id="CleaningPrice">
-                    <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                    <label class="form-label fw6">Price <span class="strict">*</span></label>
                     <input type="text" class="form-control" name="price" value="{{rentalcleaning.price}}">
                   </div>
                 </div>
@@ -120,12 +120,12 @@
                 {% if rentaldeposit.security_deposit %}
                 <div class="row mb-3 " id="SecurityDeposit2">                 
                   <div class="col-lg-6">
-                    <label class="form-label fw6">Amount in INR<span class="strict">*</span></label>
+                    <label class="form-label fw6">Amount <span class="strict">*</span></label>
                     <input type="text" class="form-control" name="amount" value="{{rentaldeposit.amount}}" >
                     {% else %}
                 <div class="row mb-3 hide" id="SecurityDeposit">                 
                 <div class="col-lg-6">
-                  <label class="form-label fw6">Amount in INR<span class="strict">*</span></label>
+                  <label class="form-label fw6">Amount <span class="strict">*</span></label>
                   <input type="text" class="form-control" name="amount" >
                 </div>
                 {% endif %}
@@ -182,7 +182,7 @@
                       <p><strong>Service name</strong>: {{extraservice.service_name}} </p>
                       <p><strong>Provided</strong>: {{extraservice.service_provided}} </p>
                       <p><strong>Fee basis</strong>: {{extraservice.fee_basis}} </p>
-                      <p><strong>Price in INR</strong>: {{extraservice.service_price}} </p>
+                      <p><strong>Price </strong>: {{extraservice.service_price}} </p>
                       <p><strong>Earliest the guest can order it</strong>: {{extraservice.earliest_guest_order}} </p>
                       <p><strong>Latest the guest can order it</strong>: {{extraservice.latest_guest_order}} </p>
                       <p><strong>Guest can cancel the order</strong>: {{extraservice.guest_cancel_order}} </p>
@@ -204,7 +204,7 @@
                       <p><strong>Service name</strong>: {{customservice.custom_service_name}} </p>
                       <p><strong>Provided</strong>: {{customservice.custom_service_provided}} </p>
                       <p><strong>Fee basis</strong>: {{customservice.custom_fee_basis}} </p>
-                      <p><strong>Price in INR</strong>: {{customservice.custom_service_price}} </p>
+                      <p><strong>Price </strong>: {{customservice.custom_service_price}} </p>
                       <p><strong>Earliest the guest can order it</strong>: {{customservice.custom_earliest_guest_order}} </p>
                       <p><strong>Latest the guest can order it</strong>: {{customservice.custom_latest_guest_order}} </p>
                       <p><strong>Guest can cancel the order</strong>: {{customservice.custom_guest_cancel_order}} </p>
@@ -480,7 +480,7 @@ aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
                           </select>
                     </div>
                     <div class="col-lg-6">
-                      <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                      <label class="form-label fw6">Price <span class="strict">*</span></label>
                       <input type="text" class="form-control" name="service_price">
                   </div>
                 </div> 
@@ -614,7 +614,7 @@ aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
                           </select>
                     </div>
                     <div class="col-lg-6">
-                      <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                      <label class="form-label fw6">Price <span class="strict">*</span></label>
                       <input type="text" class="form-control" name="service_price" id="service_prices" id="custom_service_price">
                   </div>
                 </div> 
@@ -724,7 +724,7 @@ aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
                           </select>
                     </div>
                     <div class="col-lg-6">
-                      <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                      <label class="form-label fw6">Price <span class="strict">*</span></label>
                       <input type="text" class="form-control" name="custom_service_price">
                   </div>
                 </div> 
@@ -832,7 +832,7 @@ aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
                           </select>
                     </div>
                     <div class="col-lg-6">
-                      <label class="form-label fw6">Price in INR<span class="strict">*</span></label>
+                      <label class="form-label fw6">Price <span class="strict">*</span></label>
                       <input type="text" class="form-control" name="custom_service_price" id="custom_service_prices"  >
                   </div>
                   </div> 

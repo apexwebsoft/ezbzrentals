@@ -73,6 +73,7 @@
     <tr>  
         <th>SN</th>
         <th>ID</th>
+        <th>Room Type</th>
         <th>Name</th>  
         <th>Actions</th>  
         
@@ -85,6 +86,7 @@
     <tr>  
         <td>{{forloop.counter}}</td>
         <td>{{r.id}}</td>
+        <td>{{r.room_type}}</td>
         <td>{{r.title }}</td>  
         <td class="text-left">                                                       
             <a href="/super/room-edit/{{r.id }}"><i class="las la-pen text-info font-18"></i></a>

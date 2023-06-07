@@ -28,7 +28,7 @@
         <div id="layout-wrapper">
             {% include 'bookingengine/base/top_nav.html'%}
             {% include 'bookingengine/base/left_sidebar.html'%}
-  
+	
 <div class="main-content">
 <div class="page-content">
     <div class="container-fluid">
@@ -78,7 +78,7 @@
                 </div>
                 <input id="fileupload" type="file" name="image" multiple
                 style="display: none;"
-                data-url="https://app.ezbzrentals.com/booking-engine/rooms-gallery-insert/{{room.id}}"
+                data-url="http://127.0.0.1:8000/booking-engine/rooms-gallery-insert/{{room.id}}"
                 data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
                  </div>  
               </div>

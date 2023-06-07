@@ -46,57 +46,98 @@
             </div>
                 {% endfor %}
                 {%endif%}
+                <br><br><br>
                 <form method="POST" enctype="multipart/form-data" class="post-form" action="/notification"> {% csrf_token %}   
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="validationCustom01" class="form-label fw6">Account Type</label>
-                                <select name="account_type" class="form-select" required>
-                                    <option>--Select--</option>
-                                    <option value="Private Person" {% if account.account_type == "Private Person" %} selected {% endif %}>Private Person</option>
-                                    <option value="Company" {% if account.account_type == "Company" %} selected {% endif %}>Company</option>
-                                  </select>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates"><b>News and updates</b></label></div>
+                                <div class="col-lg-6">
+                                    <label class="form-notification-label fw6" for="blog-updates"><b>Email</b></label></div>
+                              </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates">EZBZ.RENTALS newsletter</label></div>
+                                <div class="col-lg-6">
+                                <input type="checkbox" name="newsletter" id="news-updates" {% if notification.newsletter == 1 %} checked {% endif %}>
+                                <input type="hidden" name="news_value" value="0"></div>
+                              </div>
+                              <div class="row">
+                                <div class="col-lg-6">
+                                <label class="form-notification-label fw6" for="blog-updates">EZBZ.RENTALS Blog Updates</label></div>
+                                <div class="col-lg-6">
+                                <input type="checkbox" name="blog_updates" id="blog-updates" {% if notification.blog_updates == 1 %} checked {% endif %}>
+                                <input type="hidden" name="blog_value" value="0"></div>
+                              </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Features and new channel announcements</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="announcement-updates" name="new_channel_announcement" {% if notification.new_channel_announcement == 1 %} checked {% endif %}>
+                            <input type="hidden" name="announcement_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Special offers, promotions and surveys</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="survey-updates" name="surveys" {% if notification.surveys == 1 %} checked {% endif %}>
+                            <input type="hidden" name="survey_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Booking notifications</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="booking-updates" name="booking_notification" {% if notification.booking_notification == 1 %} checked {% endif %}>
+                            <input type="hidden" name="booking_value" value="0"></div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                            <label class="form-notification-label fw6" for="blog-updates">Payout notifications</label></div>
+                            <div class="col-lg-6">
+                            <input type="checkbox" id="payout-notifications" name="payout_notification" {% if notification.payout_notification == 1 %} checked {% endif %}>
+                            <input type="hidden" name="payout_notification_value" value="0"></div>
+
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="guest-notifications">Guest notifications</label>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw6" >Email</label>
-                            <input type="text" name="account_email_address"  class="form-control" id="validationCustom02"
-                                placeholder="Last name" value="{{request.user.email}}" required>
-                            <div class="valid-feedback">
-                                Looks good!
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="guest-notifications" name="guest_notification" {% if notification.guest_notification == 1 %} checked {% endif %}>
+                              <input type="hidden" name="guest_notification_value" value="0">
                             </div>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="guest-reviews">Guest reviews</label>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="guest-reviews" name="guest_review" {% if notification.guest_review == 1 %} checked {% endif %}>
+                              <input type="hidden" name="guest_review_value" value="0">
+                            </div>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-lg-6">
+                              <label class="form-notification-label fw6" for="calendar-updates">Calendar updates</label>
+                            </div>
+                            <div class="col-lg-6">
+                              <input type="checkbox" id="calendar-updates" name="calendar_update" {% if notification.calendar_update == 1 %} checked {% endif %}>
+                              <input type="hidden" name="calendar_update_value" value="0">
+                            </div>
+                          </div>
+                          
+                        <div>
+                            <button class="btn btn-primary" type="submit">Save</button>
                         </div>
-                    </div>
+                    </form>
+                        
+                        </div>
+                      </div>
+                      
                 </div>
-                    
-                    
-                    <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="validationCustom01" class="form-label fw6">Prefered Currency</label>
-                            <input type="text" name="prefered_currency" class="form-control" id="validationCustom01"
-                                placeholder="Enter Address" value="{{account.prefered_currency}}" required>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="validationCustom01" class="form-label fw6">Selected Plan</label>
-                            <input type="text" name="selected_plan" class="form-control" id="validationCustom01"
-                                placeholder="Enter Zip" value="{{account.selected_plan}}" required>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                   
-                        <button class="btn btn-primary" type="submit">Save</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -123,6 +164,18 @@
         $(".alert-success").slideUp(500);
     });
 </script>
+<script>
+    $(document).ready(function() {
+      $('input[type="checkbox"]').change(function() {
+        if($(this).is(':checked')) {
+          $(this).next('input[type="hidden"]').val('1');
+        } else {
+          $(this).next('input[type="hidden"]').val('0');
+        }
+      });
+    });
+    </script>
+    
 </body>
 
 </html>      

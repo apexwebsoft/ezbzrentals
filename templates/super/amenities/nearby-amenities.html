@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title> Activity</title>
+        <title> Nearby Amenities</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta content="" name="description" />
         <meta content="" name="author" />
@@ -30,9 +30,6 @@
             <div class="topbar">            
                 {% include 'super/base/top_nav.html' %}
         </div>
-
-
-
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -40,14 +37,14 @@
                 <div class="page-title-box">
                     <div class="row">
                         <div class="col">
-                            <h4 class="page-title">Activity</h4>
+                            <h4 class="page-title">Nearby Amenities List</h4>
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="/super/dashboard">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Activity</li>
+                                <li class="breadcrumb-item active">Nearby Amenities</li>
                             </ol>
                         </div>
                         <div class="col-auto align-self-center">
-                            <a href="/super/activity-add" class="btn btn-primary">                                           
+                            <a href="/super/nearby-amenities-add" class="btn btn-primary">                                           
                                 <i data-feather="plus" class="align-self-center icon-xs ml-1"></i>&nbsp; Add New
                             </a>
                             
@@ -62,6 +59,8 @@
 		<div class="alert alert-success border-0" role="alert">{{message}}</div>
 		{% endfor %}
 		{%endif%}
+											
+        
  
 <div class="row">
     <div class="col-12">
@@ -70,40 +69,40 @@
                 <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead>
     <tr>  
-        <th>SN</th>  
+        <th>SN</th>
         <th>ID</th>
-        <th>Name</th>
-        <th>Distance</th>
+        <th>Title</th>
+        <th>Code</th>  
         <th>Status</th> 
+        <th>Actions</th>  
         
-        <th>Actions</th>
+        
+        
     </tr>  
     </thead>  
-    <tbody>
-    {% for act in activity %}    
- 
+    <tbody>  
+ {% for aman in nearby %}  
     <tr>  
         <td>{{forloop.counter}}</td>
-        <td>{{act.id}}</td> 
-        <td>{{act.name}}</td>
-        <td>{{act.distance}}</td> 
+        <td>{{aman.id }}</td>
+        <td>{{aman.title }}</td> 
+        <td>{{aman.code }}</td>  
         <td class="level-right">
-            {% if act.status == 1 %}
+            {% if aman.status == 1 %}
             <a class="badge badge-soft-success" >Active</a>
             {% else %}
             <a class="badge badge-soft-danger">InActive</a>
             {% endif %}
         </td>
-     
+        
         <td class="text-left">                                                       
-            <a href="/super/activity-edit/{{act.id}}"><i class="las la-pen text-info font-18"></i></a>
-            <a href="/super/activity-delete/{{act.id}}" onclick="return DelItem();"  ><i class="las la-trash-alt text-danger font-18"></i></a>
+            <a href="/super/nearby-amenities-edit/{{ aman.id }}"><i class="las la-pen text-info font-18"></i></a>
+            <a href="/super/nearby-amenities-delete/{{ aman.id }}" onclick="return DelItem();"  ><i class="las la-trash-alt text-danger font-18"></i></a>
         </td>
        
         
-    </tr> 
-    {%endfor%} 
- 
+    </tr>  
+ {% endfor %}  
     </tbody>  
 </table> 
 </div>

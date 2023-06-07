@@ -72,7 +72,8 @@
         <th>SN</th>
         <th>ID</th>
         <th>Amenities Type</th>
-        <th>Title</th>  
+        <th>Title</th>
+        <th>Code</th>  
         <th>Status</th> 
         <th>Actions</th>  
         
@@ -86,7 +87,8 @@
         <td>{{forloop.counter}}</td>
         <td>{{aman.id }}</td>
         <td>{{aman.amenities_type }}</td>
-        <td>{{aman.title }}</td>  
+        <td>{{aman.title }}</td> 
+        <td>{{aman.code }}</td>  
         <td class="level-right">
             {% if aman.status == 1 %}
             <a class="badge badge-soft-success" >Active</a>

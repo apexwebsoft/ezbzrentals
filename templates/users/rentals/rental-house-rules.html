@@ -99,7 +99,11 @@
                         <option value="Pets allowed" {% if houserules.pets == "Pets allowed" %} selected {% endif %}>Pets allowed</option>
                         <option value="Pets considered" {% if houserules.pets == "Pets considered" %} selected {% endif %}>Pets considered</option>                  
                       </select>
-                  </div>                 
+                  </div> 
+                  <div class="col-lg-6">
+                    <label class="form-label fw6">Pet Fee<span class="strict">*</span></label>
+                    <input type="text" class="form-control" name="pets_charge" value="{{houserules.pets_charge}}">
+                  </div>                
                 </div>
                 
                 <div class="mb-3">

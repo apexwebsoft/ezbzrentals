@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
         <meta charset="utf-8" />
         <title>Dastyle - Admin & Dashboard Template</title>
@@ -16,21 +15,15 @@
         <link href="/static/super/plugins/daterangepicker/daterangepicker.css" rel="stylesheet" type="text/css" />
         <link href="/static/super/css/app.min.css" rel="stylesheet" type="text/css" />
         <link href="/static/super/css/custom.css" rel="stylesheet" type="text/css" />
-
     </head>
-
     <body class="dark-sidenav">
       <div class="left-sidenav">
           {% include 'super/base/left_sidebar.html' %}
       </div>
-      
-
       <div class="page-wrapper">
           <div class="topbar">            
             {% include 'super/base/top_nav.html' %}
           </div>
-
-
             <div class="page-content">
                 <div class="container-fluid">
                     <div class="row">
@@ -49,17 +42,21 @@
                             </div>
                         </div>
                     </div>
-                </div>
+            </div>
 
 
-                <h1>List of Rentals:</h1>
-                <ul>
-                {% for rental in data %}
-                  {% if rental.attributes.rental_name == 'Aman Rajput' %}
-                    <li>{{ rental.attributes.rental_name }} - Rental ID: {{ rental.id }}</li>
-                  {% endif %}
-                {% endfor %}
-                </ul>
+                {% if rental.security_deposit   %}
+                <input type="checkbox" id="security_deposit_checkbox" name="security_deposit" checked>
+                {% else %}
+                <input type="checkbox" id="security_deposit_checkbox" name="security_deposit">
+                {% endif %}
+                <label for="security_deposit_checkbox">Security Deposit</label>
+                
+                {% if rental.security_deposit  %}
+                <input type="number" id="security_deposit_amount" name="security_deposit_amount" value="{{ rental.security_deposit_amount }}">
+                {% else %}
+                <input type="number" id="security_deposit_amount" name="security_deposit_amount" style="display:none;">
+                {% endif %}
 
 
 
