@@ -18,3 +18,5 @@ class TestForm(forms.Form):
         widget=calculation.FormulaInput('apply_taxes ? parseFloat(amount + tax).toFixed(2) : 0.0') 
     )
 
+class CouponApplyForm(forms.Form):
+    code=forms.CharField()

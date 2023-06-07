@@ -20,30 +20,9 @@ from rest_framework import routers
 from users import views
 
 router = routers.DefaultRouter()
-#API URL Routes start
-
 router.register('api/rentals', views.RentalViewSet)
-router.register('api/rental-basic', views.RentalBasicViewSet)
-router.register('api/rental-gallery', views.RentalsGalleryViewSet)
-router.register('api/rental-location', views.RentalsLocationViewSet)
-router.register('api/rental-other-room', views.RentalsOtherRoomViewSet)
-router.register('api/rental-amenities', views.RentalAmenitiesViewSet)
-router.register('api/rental-basic-rates', views.RentalBasicRatesViewSet)
-router.register('api/rental-seasonal-rates', views.RentalSeasonalRatesViewSet)
-router.register('api/rental-deposit', views.RentalDepositViewSet)
-router.register('api/rental-longstay-discount', views.RentalLongStayDiscountViewSet)
-router.register('api/rental-earlybird-discount', views.RentalEarlyBirdDiscountViewSet)
-router.register('api/rental-cleaning', views.RentalCleaningViewSet)
-router.register('api/rental-tax', views.RentalTaxViewSet)
-router.register('api/rental-extra-services', views.RentalExtraServicesViewSet)
-router.register('api/rental-custom-services', views.RentalCustomServicesViewSet)
-router.register('api/rental-house-rules', views.RentalHouseRulesViewSet)
-router.register('api/rental-policy', views.RentalPolicyViewSet)
-router.register('api/rental-instruction', views.RentalInstructionViewSet)
 router.register('api/bookings', views.BookingsViewSet)
-
-
-#API URL Routes End
+router.register('api/beds', views.BedViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

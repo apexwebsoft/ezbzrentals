@@ -210,27 +210,11 @@ def user_profile_delete(request, id):
 @login_required(login_url='/agents/')
 def user_indivisual_profile(request, id):
     user_profile = UserProfile.objects.get(id=id)
-    user =user_profile.user
-   
-
-    if request.method == 'POST':
-        new_password = request.POST.get('password')
-        confirm_password = request.POST.get('cpassword')
-
-        if new_password == confirm_password:
-            user.set_password(new_password)
-            user.save()
-            return redirect('/super/user-profile')
-
-    
-    property_logo=user_profile.property_logo
     User = get_user_model()
     user_indivisual = User.objects.get(id=user_profile.user_id)
     users={
         'user_profile':user_profile,
-        'user_indivisual':user_indivisual,
-        'property_logo':property_logo,
-        'user': user
+        'user_indivisual':user_indivisual
     }
     return render(request, "agents/users/user-indivisual-profile.html",users)
 

@@ -4,6 +4,7 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from bookingengine.forms import CouponApplyForm, TestForm
 from bookingengine.models import BookingAmenities, BookingInformation, BookingRoom, Categories, ColorPalettes, ContactInfo, Coupon, ExtraService, FooterWidgets, Rates, Reservation, RoomsGallery, Seasons, Services, SocialMedia, Tags,Tax, TermCondition
 from rentals.models import  Bookings, Country, PropertyRole, Rental, UserProfile
 from django.contrib.auth.models import User
